@@ -1,0 +1,144 @@
+/* 誉友科技 全站共享样式 - 设计系统变量 */
+:root {
+  /* 品牌色 */
+  --brand: #ff7a18;
+  --brand-light: #ff9436;
+  --brand-dark: #e56a0e;
+  --brand-grad: linear-gradient(135deg, #ff7a18, #ff9436);
+  --blue: #1a7fd4;
+  --blue-grad: linear-gradient(135deg, #1a7fd4, #3aa0ee);
+  --red: #e60012;
+  /* 背景与表面 */
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #fafbfc;
+  /* 文字 */
+  --text: #1a1a1a;
+  --text-2: #666666;
+  --text-3: #a0a8b4;
+  /* 边框与分隔 */
+  --border: #f0f2f5;
+  --divider: #f0f2f5;
+  /* 功能色 */
+  --success: #2faa55;
+  --warning: #ffd21e;
+  --danger: #e60012;
+  /* 阴影 */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10);
+  /* 圆角 */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  /* 间距 */
+  --sp: 16px;
+  --sp-sm: 12px;
+  --sp-lg: 20px;
+  /* 动效 */
+  --tr: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 深色模式 */
+[data-theme="dark"] {
+  --bg: #121418;
+  --surface: #1c1f24;
+  --surface-2: #23272e;
+  --text: #e8eaed;
+  --text-2: #b0b8c4;
+  --text-3: #7a828e;
+  --border: #2a2e35;
+  --divider: #2a2e35;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.35);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.45);
+}
+
+/* 基础重置与统一 */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 14px;
+  margin: 0;
+  min-height: 100vh;
+  transition: background var(--tr), color var(--tr);
+}
+
+/* 页面淡入 */
+body { animation: pageIn 0.35s ease-out; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* 通用卡片与容器 */
+.card, .section, .version-card, .feedback-card {
+  background: var(--surface);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  transition: background var(--tr), box-shadow var(--tr);
+}
+
+/* 统一点击反馈 */
+a, button, .cell, .prod-card, .prod-item, .menu-item, .tag, .qcat, .dot, .contact-row, [onclick] {
+  cursor: pointer;
+  transition: opacity var(--tr), transform var(--tr), background var(--tr), box-shadow var(--tr);
+}
+.cell:active, .prod-card:active, .prod-item:active, .tag:active, .qcat:active, .menu-item:active {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
+/* 按钮规范 */
+.btn, .search-btn, button {
+  font-family: inherit;
+  border: none;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+/* 输入框统一 */
+input, textarea, select {
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  transition: background var(--tr), border-color var(--tr);
+}
+input::placeholder, textarea::placeholder { color: var(--text-3); }
+
+/* 图片圆角与加载 */
+img { border-radius: var(--r-sm); background: var(--surface-2); }
+
+/* 分割线统一 */
+hr, .divider { border: none; border-top: 1px solid var(--divider); }
+
+/* 标题层级 */
+h1, h2, h3, h4 { margin: 0; font-weight: 700; line-height: 1.4; }
+h1 { font-size: 20px; } h2 { font-size: 18px; } h3 { font-size: 16px; } h4 { font-size: 15px; }
+
+/* 文字颜色工具 */
+.text-1 { color: var(--text); } .text-2 { color: var(--text-2); } .text-3 { color: var(--text-3); }
+
+/* 弹性布局工具 */
+.flex { display: flex; } .flex-1 { flex: 1; } .aic { align-items: center; }
+.jcb { justify-content: space-between; } .jcc { justify-content: center; }
+
+/* 安全区适配（刘海屏） */
+.safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 16px); }
+.safe-top { padding-top: env(safe-area-inset-top); }
+
+/* 全局最大宽度约束（横屏/平板不拉伸） */
+body { max-width: 480px; margin: 0 auto; }
+
+/* 夜间模式切换按钮 */
+.theme-toggle {
+  position: fixed; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 20px);
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--brand-grad); color: #fff; font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg); z-index: 9999; border: none;
+  transition: transform var(--tr), background var(--tr);
+}
+.theme-toggle:active { transform: scale(0.9); }

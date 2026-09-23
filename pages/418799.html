@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>关于我们</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { display:flex; align-items:center; justify-content:center; padding:14px 16px; background:#fff; position:sticky; top:0; z-index:10; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .nav .back { position:absolute; left:16px; font-size:22px; color:#1a1a1a; cursor:pointer; }
+  .nav .title { font-size:16px; font-weight:700; color:#1a1a1a; }
+  .about-hero { background:linear-gradient(160deg,#1a7fd4,#3aa0ee); padding:32px 20px; text-align:center; }
+  .logo-box { width:64px; height:64px; margin:0 auto 14px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+  .logo-box img { width:46px; height:46px; object-fit:contain; }
+  .logo-box span { font-size:28px; }
+  .hero-name { font-size:20px; font-weight:700; color:#fff; }
+  .hero-sub { font-size:12px; color:rgba(255,255,255,0.85); margin-top:6px; }
+  .version-card { margin:16px; background:#fff; border-radius:14px; padding:18px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+  .version-card .label { font-size:14px; color:#555; }
+  .version-card .value { font-size:14px; font-weight:700; color:#ff7a18; }
+  .section { margin:0 16px 16px; background:#fff; border-radius:14px; padding:18px; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+  .section-title { font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:12px; padding-left:10px; border-left:3px solid #ff7a18; }
+  .section p { font-size:13px; color:#666; line-height:1.9; margin-bottom:8px; }
+  .contact-row { display:flex; align-items:center; padding:10px 0; border-bottom:1px solid #f0f2f5; }
+  .contact-row:last-child { border-bottom:none; }
+  .contact-row .icon { width:36px; height:36px; border-radius:9px; background:#fff3e8; display:flex; align-items:center; justify-content:center; font-size:16px; margin-right:12px; }
+  .contact-row .info .t { font-size:13px; color:#a0a8b4; }
+  .contact-row .info .v { font-size:14px; color:#1a1a1a; font-weight:600; margin-top:2px; }
+  .footer { text-align:center; font-size:11px; color:#c0c6d0; padding:20px 16px 30px; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="back" onclick="history.back()">‹</div>
+    <div class="title">关于我们</div>
+  </div>
+
+  <div class="about-hero">
+    <div class="logo-box">
+      <img src="../assets/img/logo_nav.png" alt="誉友科技" onerror="this.parentNode.innerHTML='<span>💻</span>'">
+    </div>
+    <div class="hero-name">誉友科技</div>
+    <div class="hero-sub">YUYOO TECHNOLOGY · 专业软件开发·数字化解决方案服务商</div>
+  </div>
+
+  <div class="version-card">
+    <div class="label">当前版本</div>
+    <div class="value">V1.0.0</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">公司介绍</div>
+    <p>誉友科技是一家专注于软件开发与数字化服务的科技公司，致力于为企业提供 ERP、CRM、小程序、移动 APP、云服务部署等一站式解决方案。</p>
+    <p>我们拥有一支经验丰富的技术团队，深耕制造业、贸易、零售等多个行业，以技术创新驱动企业数字化转型，助力客户降本增效、提升核心竞争力。</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">联系我们</div>
+    <div class="contact-row">
+      <div class="icon">📞</div>
+      <div class="info"><div class="t">客服热线</div><div class="v">199-1703-3375</div></div>
+    </div>
+    <div class="contact-row">
+      <div class="icon">🕐</div>
+      <div class="info"><div class="t">工作时间</div><div class="v">周一至周五 9:00 - 18:00</div></div>
+    </div>
+    <div class="contact-row">
+      <div class="icon">🏢</div>
+      <div class="info"><div class="t">公司定位</div><div class="v">软件开发 · 云服务 · 数据服务</div></div>
+    </div>
+  </div>
+
+  <div class="footer">© 2026 誉友科技 YUYOO TECHNOLOGY · 保留所有权利</div>
+</body>
+</html>

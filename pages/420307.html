@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>搜索结果</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { display:flex; align-items:center; padding:12px 16px; background:#fff; position:sticky; top:0; z-index:10; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .back { width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#1a1a1a; cursor:pointer; }
+  .search-box { flex:1; display:flex; align-items:center; background:#f0f2f5; border-radius:18px; padding:8px 14px; margin:0 10px; }
+  .search-box input { flex:1; border:none; background:transparent; outline:none; font-size:14px; color:#1a1a1a; }
+  .search-box input::placeholder { color:#a0a8b4; }
+  .search-btn { font-size:14px; color:#ff7a18; font-weight:600; cursor:pointer; padding:6px 4px; }
+  .result-info { padding:14px 16px 6px; font-size:13px; color:#a0a8b4; }
+  .result-info b { color:#ff7a18; }
+  .prod-list { padding:8px 16px 20px; }
+  .prod-item { display:flex; background:#fff; border-radius:12px; overflow:hidden; margin-bottom:12px; box-shadow:0 1px 4px rgba(0,0,0,0.05); cursor:pointer; }
+  .prod-item:active { opacity:0.85; }
+  .prod-img { width:110px; height:90px; object-fit:cover; flex-shrink:0; }
+  .prod-info { flex:1; padding:12px 14px; display:flex; flex-direction:column; justify-content:center; }
+  .prod-name { font-size:15px; font-weight:600; color:#1a1a1a; }
+  .prod-slogan { font-size:12px; color:#ff7a18; margin-top:5px; }
+  .prod-desc { font-size:11px; color:#a0a8b4; margin-top:5px; }
+  .empty { text-align:center; padding:60px 20px; }
+  .empty .icon { font-size:52px; }
+  .empty .txt { font-size:14px; color:#a0a8b4; margin-top:12px; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="back" onclick="history.back()">‹</div>
+    <div class="search-box">
+      <input id="kw" placeholder="搜索产品 / 解决方案" onkeydown="if(event.key==='Enter')doSearch()">
+    </div>
+    <div class="search-btn" onclick="doSearch()">搜索</div>
+  </div>
+  <div class="result-info" id="info"></div>
+  <div class="prod-list" id="list"></div>
+
+<script src="../shared/data.js"></script>
+  <script src="../assets/js/products.js"></script>
+<script>
+  function getKw() { return new URLSearchParams(location.search).get('kw') || ''; }
+
+  function search(kw) {
+    kw = (kw || '').toLowerCase();
+    if (!kw) return [];
+    return YUYOO_PRODUCTS.filter(function(p) {
+      return p.name.toLowerCase().indexOf(kw) > -1 ||
+             p.slogan.toLowerCase().indexOf(kw) > -1 ||
+             p.desc.toLowerCase().indexOf(kw) > -1 ||
+             p.category.toLowerCase().indexOf(kw) > -1;
+    });
+  }
+
+  function render() {
+    var kw = getKw();
+    document.getElementById('kw').value = kw;
+    var list = search(kw);
+    var info = document.getElementById('info');
+    var box = document.getElementById('list');
+    if (!list.length) {
+      info.innerHTML = '未找到与「<b>' + kw + '</b>」相关的产品';
+      box.innerHTML = '<div class="empty"><div class="icon">📦</div><div class="txt">暂无相关结果，换个关键词试试</div></div>';
+      return;
+    }
+    info.innerHTML = '共找到 <b>' + list.length + '</b> 个与「<b>' + kw + '</b>」相关的产品';
+    var html = '';
+    list.forEach(function(p) {
+      html += '<div class="prod-item" onclick="openDetail(\'' + p.id + '\')">' +
+        '<img class="prod-img" src="' + p.image + '" onerror="this.onerror=null;this.src=yuyooProductImage(p.name)">' +
+        '<div class="prod-info">' +
+          '<div class="prod-name">' + p.name + '</div>' +
+          '<div class="prod-slogan">' + p.slogan + '</div>' +
+          '<div class="prod-desc">' + p.desc + '</div>' +
+        '</div></div>';
+    });
+    box.innerHTML = html;
+  }
+
+  function doSearch() {
+    var kw = document.getElementById('kw').value.trim();
+    if (kw) window.location.href = '420307.html?kw=' + encodeURIComponent(kw);
+  }
+  function openDetail(id) { window.location.href = '418913.html?id=' + id; }
+
+  render();
+</script>
+</body>
+</html>

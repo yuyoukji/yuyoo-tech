@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>我的收藏</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { position:sticky; top:0; z-index:100; height:50px; background:#fff; display:flex; align-items:center; padding:0 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#333; cursor:pointer; border-radius:50%; }
+  .nav-back:active { background:#f0f0f0; }
+  .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#1a1a1a; }
+  .nav-right { width:36px; font-size:13px; color:#ff7a18; text-align:right; cursor:pointer; }
+  .container { padding:14px; }
+  .empty { padding:90px 20px; text-align:center; }
+  .empty-icon { font-size:52px; margin-bottom:16px; }
+  .empty-text { font-size:14px; color:#999; margin-bottom:24px; }
+  .btn { display:inline-block; padding:10px 28px; border-radius:22px; font-size:14px; cursor:pointer; border:none; background:linear-gradient(90deg,#ff7a18,#ff9436); color:#fff; }
+  .btn:active { opacity:.85; }
+  .card { display:flex; background:#fff; border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); position:relative; }
+  .card-img { width:90px; height:90px; border-radius:10px; overflow:hidden; flex-shrink:0; background:#e8f7ee; }
+  .card-img img { width:100%; height:100%; object-fit:cover; }
+  .card-body { flex:1; margin-left:12px; display:flex; flex-direction:column; }
+  .card-name { font-size:15px; font-weight:600; color:#1a1a1a; line-height:1.4; }
+  .card-slogan { font-size:12px; color:#8a919c; margin-top:5px; }
+  .card-cat { margin-top:auto; font-size:11px; color:#ff7a18; background:#fff3e8; align-self:flex-start; padding:2px 8px; border-radius:4px; }
+  .card-del { position:absolute; top:10px; right:12px; font-size:16px; color:#c0c6cd; cursor:pointer; padding:4px; }
+  .card-del:active { color:#e64340; }
+  .toast { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.75); color:#fff; padding:12px 22px; border-radius:8px; font-size:14px; z-index:999; display:none; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-back" onclick="history.back()">‹</div>
+    <div class="nav-title">我的收藏</div>
+    <div class="nav-right" id="editBtn" onclick="toggleEdit()">管理</div>
+  </div>
+  <div class="container" id="list"></div>
+  <div class="toast" id="toast"></div>
+
+<script>
+  var FAV_KEY = 'yuyoo_favs';
+  var editMode = false;
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1500);
+  }
+  function getFavs() {
+    try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); }
+    catch (e) { return []; }
+  }
+  function saveFavs(list) { localStorage.setItem(FAV_KEY, JSON.stringify(list)); }
+
+  function render() {
+    var data = getFavs();
+    var box = document.getElementById('list');
+    document.getElementById('editBtn').textContent = editMode ? '完成' : '管理';
+    if (!data.length) {
+      box.innerHTML = '<div class="empty"><div class="empty-icon">⭐</div>' +
+        '<div class="empty-text">暂无收藏，去逛逛吧</div>' +
+        '<button class="btn" onclick="goHome()">去首页</button></div>';
+      return;
+    }
+    var html = '';
+    data.forEach(function(item) {
+      html += '<div class="card">' +
+        '<div class="card-img"><img src="' + (item.image || '') + '"></div>' +
+        '<div class="card-body">' +
+          '<div class="card-name">' + esc(item.name || '产品') + '</div>' +
+          '<div class="card-slogan">' + esc(item.slogan || '') + '</div>' +
+          '<div class="card-cat">' + esc(item.category || '产品') + '</div>' +
+        '</div>' +
+        '<div class="card-del" onclick="removeFav(\'' + item.id + '\')">' + (editMode ? '✕' : '›') + '</div>' +
+      '</div>';
+    });
+    box.innerHTML = html;
+  }
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function toggleEdit() { editMode = !editMode; render(); }
+
+  function removeFav(id) {
+    var list = getFavs().filter(function(f){ return f.id !== id; });
+    saveFavs(list);
+    showToast('已取消收藏');
+    render();
+  }
+  function goHome() { window.location.href = '418843.html'; }
+  function openDetail(id) { window.location.href = '418913.html?id=' + id; }
+
+  render();
+</script>
+</body>
+</html>

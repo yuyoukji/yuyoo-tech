@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>反馈记录</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { position:sticky; top:0; z-index:100; height:50px; background:#fff; display:flex; align-items:center; padding:0 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#333; cursor:pointer; border-radius:50%; }
+  .nav-back:active { background:#f0f0f0; }
+  .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#1a1a1a; }
+  .nav-right { width:36px; }
+  .container { padding:14px; }
+  .empty { padding:80px 20px; text-align:center; }
+  .empty-icon { font-size:52px; margin-bottom:16px; }
+  .empty-text { font-size:14px; color:#999; margin-bottom:24px; }
+  .btn { display:inline-block; padding:10px 28px; border-radius:22px; font-size:14px; cursor:pointer; border:none; }
+  .btn-primary { background:linear-gradient(90deg,#ff7a18,#ff9436); color:#fff; }
+  .btn-primary:active { opacity:.85; }
+  .btn-clear { width:100%; margin-top:16px; padding:12px; border-radius:10px; background:#fff; color:#e64340; font-size:14px; border:1px solid #f3c1c0; cursor:pointer; }
+  .card { background:#fff; border-radius:12px; padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .card-type { font-size:12px; padding:3px 10px; border-radius:4px; background:#fff3e8; color:#ff7a18; font-weight:600; }
+  .card-status { font-size:12px; padding:3px 10px; border-radius:4px; font-weight:500; }
+  .status-pending { background:#fff7e0; color:#d48806; }
+  .status-done { background:#e8f7ee; color:#2faa55; }
+  .card-date { font-size:12px; color:#b0b8c4; }
+  .card-content { font-size:14px; color:#333; line-height:1.6; margin:8px 0; word-break:break-all; }
+  .card-imgs { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .card-imgs img { width:70px; height:70px; object-fit:cover; border-radius:8px; border:1px solid #eee; }
+  .toast { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.75); color:#fff; padding:12px 22px; border-radius:8px; font-size:14px; z-index:999; display:none; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-back" onclick="history.back()">‹</div>
+    <div class="nav-title">反馈记录</div>
+    <div class="nav-right"></div>
+  </div>
+  <div class="container" id="list"></div>
+  <div class="toast" id="toast"></div>
+
+<script>
+  var KEY = 'yuyoo_feedbacks';
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch (e) { return []; }
+  }
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1500);
+  }
+  function typeLabel(t) {
+    return { lag:'卡顿不流畅', hot:'手机发烫', crash:'闪退/崩溃', ui:'界面显示异常', func:'功能无法使用', other:'其他建议' }[t] || t || '其他';
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+  function render() {
+    var data = load();
+    var box = document.getElementById('list');
+    if (!data.length) {
+      box.innerHTML =
+        '<div class="empty"><div class="empty-icon">📭</div>' +
+        '<div class="empty-text">暂无反馈记录</div>' +
+        '<button class="btn btn-primary" onclick="goFeedback()">去反馈</button></div>';
+      return;
+    }
+    var html = '';
+    data.forEach(function(item, i) {
+      var imgs = (item.images && item.images.length)
+        ? '<div class="card-imgs">' + item.images.map(function(s){
+            return '<img src="' + s + '">';
+          }).join('') + '</div>'
+        : '';
+      var status = item.status === 'done'
+        ? '<span class="card-status status-done">已处理</span>'
+        : '<span class="card-status status-pending">处理中</span>';
+      html +=
+        '<div class="card">' +
+          '<div class="card-head">' +
+            '<span class="card-type">' + typeLabel(item.type) + '</span>' + status +
+          '</div>' +
+          '<div class="card-content">' + escapeHtml(item.content) + '</div>' +
+          imgs +
+          '<div class="card-date">' + escapeHtml(item.date) + '</div>' +
+        '</div>';
+    });
+    html += '<button class="btn-clear" onclick="clearAll()">清空全部记录</button>';
+    box.innerHTML = html;
+  }
+  function goFeedback() {
+    window.location.href = '418813.html';
+  }
+  function clearAll() {
+    if (confirm('确定清空所有反馈记录吗？')) {
+      localStorage.removeItem(KEY);
+      showToast('已清空');
+      render();
+    }
+  }
+  render();
+</script>
+</body>
+</html>

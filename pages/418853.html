@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>平台公告</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { position:sticky; top:0; z-index:100; height:50px; background:#fff; display:flex; align-items:center; padding:0 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#333; cursor:pointer; border-radius:50%; }
+  .nav-back:active { background:#f0f0f0; }
+  .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#1a1a1a; }
+  .nav-right { width:36px; }
+  .tabs { position:sticky; top:50px; z-index:99; display:flex; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+  .tab { flex:1; text-align:center; padding:12px 0; font-size:14px; color:#666; cursor:pointer; position:relative; }
+  .tab.active { color:#ff7a18; font-weight:600; }
+  .tab.active::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:24px; height:3px; border-radius:2px; background:#ff7a18; }
+  .list { padding:14px; }
+  .notice { background:#fff; border-radius:12px; padding:16px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); cursor:pointer; transition:transform .1s; }
+  .notice:active { transform:scale(0.98); }
+  .notice-head { display:flex; align-items:flex-start; }
+  .notice-tag { flex-shrink:0; font-size:11px; padding:2px 8px; border-radius:4px; margin-right:10px; margin-top:2px; font-weight:600; }
+  .tag-important { background:#ffecec; color:#e64340; }
+  .tag-update { background:#fff3e8; color:#ff7a18; }
+  .tag-notice { background:#e8f0fb; color:#1a7fd4; }
+  .tag-activity { background:#e8f7ee; color:#2faa55; }
+  .notice-title { flex:1; font-size:15px; font-weight:600; color:#1a1a1a; line-height:1.5; }
+  .notice-desc { font-size:13px; color:#8a919c; line-height:1.6; margin-top:8px; }
+  .notice-meta { display:flex; align-items:center; margin-top:10px; font-size:12px; color:#b0b8c4; }
+  .notice-meta .views { margin-left:auto; }
+  .notice.pin { border:1px solid #ffd9d0; background:#fffbfb; }
+  .pin-label { font-size:10px; color:#e64340; margin-right:6px; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-back" onclick="history.back()">‹</div>
+    <div class="nav-title">平台公告</div>
+    <div class="nav-right"></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-type="all">全部</div>
+    <div class="tab" data-type="important">重要</div>
+    <div class="tab" data-type="update">更新</div>
+    <div class="tab" data-type="activity">活动</div>
+  </div>
+
+  <div class="list" id="list"></div>
+
+<script>
+  var NOTICES = [
+    { type:'important', tag:'重要', pin:true,  title:'系统维护通知：9月28日 02:00-04:00 平台升级', desc:'升级期间系统将短暂不可用，请提前保存业务数据，给您带来不便敬请谅解。', date:'2026-09-24', views:3268 },
+    { type:'update',    tag:'更新', pin:false, title:'誉友ERP V2.0 版本发布：新增智能审批流与数据大屏', desc:'可视化流程设计器、经营驾驶舱、开放API、移动端全面优化，诚邀体验。', date:'2026-09-24', views:1286 },
+    { type:'update',    tag:'更新', pin:false, title:'小程序模板库上新：新增电商、预约、展示三大行业模板', desc:'开箱即用，支持自定义配色与模块配置，最快1天上线。', date:'2026-09-20', views:856 },
+    { type:'activity',  tag:'活动', pin:false, title:'新客专享：软件定制开发首单立减 2000 元', desc:'即日起至10月31日，签约ERP/CRM/小程序定制项目即可享受优惠。', date:'2026-09-18', views:2143 },
+    { type:'notice',    tag:'公告', pin:false, title:'关于规范账号使用与信息安全的提醒', desc:'请妥善保管账号密码，定期修改，勿将账号出借他人，谨防信息泄露。', date:'2026-09-15', views:1590 },
+    { type:'important', tag:'重要', pin:false, title:'隐私政策更新：进一步明确个人信息保护范围', desc:'为符合最新法规要求，我们更新了隐私政策，请前往查看并确认。', date:'2026-09-10', views:987 }
+  ];
+
+  function render(type) {
+    var list = type === 'all' ? NOTICES : NOTICES.filter(function(n){ return n.type === type; });
+    var html = '';
+    list.forEach(function(n) {
+      html += '<div class="notice' + (n.pin ? ' pin' : '') + '" onclick="openDetail()">' +
+        '<div class="notice-head">' +
+          '<span class="notice-tag tag-' + n.type + '">' + n.tag + '</span>' +
+          '<div class="notice-title">' + (n.pin ? '<span class="pin-label">[置顶]</span>' : '') + n.title + '</div>' +
+        '</div>' +
+        '<div class="notice-desc">' + n.desc + '</div>' +
+        '<div class="notice-meta"><span>' + n.date + '</span><span class="views">阅读 ' + n.views + '</span></div>' +
+      '</div>';
+    });
+    document.getElementById('list').innerHTML = html;
+  }
+
+  document.querySelector('.tabs').addEventListener('click', function(e) {
+    var t = e.target.closest('.tab');
+    if (!t) return;
+    document.querySelectorAll('.tab').forEach(function(el){ el.classList.remove('active'); });
+    t.classList.add('active');
+    render(t.getAttribute('data-type'));
+  });
+
+  function openDetail() { window.location.href = '418851.html'; }
+  render('all');
+</script>
+</body>
+</html>

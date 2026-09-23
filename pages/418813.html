@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>意见反馈</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; padding-bottom:40px; }
+  .nav { position:sticky; top:0; z-index:100; height:50px; background:#fff; display:flex; align-items:center; padding:0 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#333; cursor:pointer; border-radius:50%; }
+  .nav-back:active { background:#f0f0f0; }
+  .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#1a1a1a; }
+  .nav-record { font-size:13px; color:#ff7a18; cursor:pointer; padding:6px 4px; }
+  .container { padding:16px 14px; }
+  .section { background:#fff; border-radius:12px; padding:16px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .section-title { font-size:14px; font-weight:600; color:#1a1a1a; margin-bottom:14px; }
+  .type-group { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .type-item { flex:1; padding:12px 0; text-align:center; font-size:14px; color:#666; background:#f7f8fa; border-radius:10px; border:1.5px solid transparent; cursor:pointer; transition:all .15s; }
+  .type-item.active { background:#fff3e8; color:#ff7a18; border-color:#ff7a18; font-weight:600; }
+  .type-item:active { opacity:.8; }
+  .textarea-wrap { position:relative; background:#f7f8fa; border-radius:10px; padding:12px; }
+  textarea { width:100%; min-height:130px; border:none; background:transparent; resize:vertical; font-size:14px; line-height:1.6; color:#333; outline:none; font-family:inherit; }
+  textarea::placeholder { color:#b0b8c4; }
+  .count { position:absolute; right:12px; bottom:10px; font-size:12px; color:#b0b8c4; }
+  .upload-box { display:flex; flex-wrap:wrap; gap:10px; }
+  .upload-item { width:74px; height:74px; border-radius:10px; overflow:hidden; position:relative; border:1px solid #eee; }
+  .upload-item img { width:100%; height:100%; object-fit:cover; }
+  .upload-item .del { position:absolute; top:0; right:0; width:20px; height:20px; background:rgba(0,0,0,0.55); color:#fff; font-size:12px; display:flex; align-items:center; justify-content:center; border-radius:0 10px 0 10px; cursor:pointer; }
+  .upload-add { width:74px; height:74px; border-radius:10px; border:1.5px dashed #d0d5db; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#b0b8c4; cursor:pointer; font-size:12px; gap:4px; }
+  .upload-add .plus { font-size:26px; line-height:1; }
+  .upload-hint { font-size:12px; color:#b0b8c4; margin-top:10px; }
+  .submit-btn { width:100%; padding:14px; border:none; border-radius:24px; background:linear-gradient(90deg,#ff7a18,#ff9436); color:#fff; font-size:16px; font-weight:600; cursor:pointer; margin-top:6px; }
+  .submit-btn:active { opacity:.85; }
+  .toast { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.75); color:#fff; padding:12px 22px; border-radius:8px; font-size:14px; z-index:999; display:none; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-back" onclick="history.back()">‹</div>
+    <div class="nav-title">意见反馈</div>
+    <div class="nav-record" onclick="goRecords()">反馈记录</div>
+  </div>
+
+  <div class="container">
+    <div class="section">
+      <div class="section-title">反馈类型</div>
+      <div class="type-group" id="typeGroup">
+        <div class="type-item active" data-type="lag">卡顿不流畅</div>
+        <div class="type-item" data-type="hot">手机发烫</div>
+        <div class="type-item" data-type="crash">闪退/崩溃</div>
+        <div class="type-item" data-type="ui">界面显示异常</div>
+        <div class="type-item" data-type="func">功能无法使用</div>
+        <div class="type-item" data-type="other">其他建议</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">反馈内容</div>
+      <div class="textarea-wrap">
+        <textarea id="content" maxlength="300" placeholder="问题描述的越详细，有助于我们更快的解决问题"></textarea>
+        <div class="count"><span id="cur">0</span>/300</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">上传截图（选填）</div>
+      <div class="upload-box" id="uploadBox">
+        <div class="upload-add" id="uploadAdd" onclick="pickImage()">
+          <div class="plus">+</div>
+          <div>添加图片</div>
+        </div>
+      </div>
+      <div class="upload-hint">请上传应用截图，最多上传 6 张</div>
+    </div>
+
+    <button class="submit-btn" onclick="submit()">提交反馈</button>
+  </div>
+  <div class="toast" id="toast"></div>
+
+<script>
+  var KEY = 'yuyoo_feedbacks';
+  var MAX_IMG = 6;
+  var curType = 'lag';
+  var images = [];
+
+  // 反馈类型选择
+  document.getElementById('typeGroup').addEventListener('click', function(e) {
+    var item = e.target.closest('.type-item');
+    if (!item) return;
+    document.querySelectorAll('.type-item').forEach(function(el){ el.classList.remove('active'); });
+    item.classList.add('active');
+    curType = item.getAttribute('data-type');
+  });
+
+  // 字数统计
+  var ta = document.getElementById('content');
+  ta.addEventListener('input', function() {
+    document.getElementById('cur').textContent = ta.value.length;
+  });
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1600);
+  }
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch (e) { return []; }
+  }
+  function save(list) {
+    localStorage.setItem(KEY, JSON.stringify(list));
+  }
+
+  function pickImage() {
+    if (images.length >= MAX_IMG) { showToast('最多上传 ' + MAX_IMG + ' 张'); return; }
+    var input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*';
+    input.onchange = function() {
+      var file = input.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        images.push(e.target.result);
+        renderImages();
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  }
+
+  function renderImages() {
+    var box = document.getElementById('uploadBox');
+    box.querySelectorAll('.upload-item').forEach(function(el){ el.remove(); });
+    var add = document.getElementById('uploadAdd');
+    images.forEach(function(src, idx) {
+      var item = document.createElement('div');
+      item.className = 'upload-item';
+      item.innerHTML = '<img src="' + src + '"><div class="del" onclick="removeImage(' + idx + ')">×</div>';
+      box.insertBefore(item, add);
+    });
+    add.style.display = images.length >= MAX_IMG ? 'none' : 'flex';
+  }
+
+  function removeImage(idx) {
+    images.splice(idx, 1);
+    renderImages();
+  }
+
+  function submit() {
+    var content = ta.value.trim();
+    if (!content) { showToast('请填写反馈内容'); return; }
+    if (content.length < 5) { showToast('请至少输入 5 个字'); return; }
+
+    var list = load();
+    list.unshift({
+      type: curType,
+      content: content,
+      images: images.slice(),
+      date: new Date().toLocaleString('zh-CN', { hour12: false }),
+      status: 'pending'
+    });
+    save(list);
+
+    showToast('提交成功，感谢您的反馈');
+    ta.value = ''; document.getElementById('cur').textContent = '0';
+    images = []; renderImages();
+    setTimeout(goRecords, 1200);
+  }
+
+  function goRecords() {
+    window.location.href = '418812.html';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>登录</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:linear-gradient(160deg,#fff 0%,#fff8f2 60%,#ffefe2 100%); min-height:100vh; display:flex; flex-direction:column; align-items:center; }
+  .logo-area { margin-top:76px; text-align:center; }
+  .logo-img { width:76px; height:76px; border-radius:18px; object-fit:cover; box-shadow:0 8px 20px rgba(255,122,24,0.25); }
+  .logo-name { margin-top:16px; font-size:20px; font-weight:700; color:#1a1a1a; letter-spacing:1px; }
+  .logo-sub { margin-top:6px; font-size:12px; color:#b0b8c4; }
+  .panel { width:86%; max-width:340px; margin-top:40px; background:#fff; border-radius:18px; padding:26px 24px; box-shadow:0 6px 24px rgba(0,0,0,0.06); }
+  .panel-title { font-size:15px; font-weight:600; color:#1a1a1a; }
+  .panel-desc { font-size:13px; color:#8a919c; margin-top:8px; line-height:1.6; }
+  .panel-desc .scope { color:#ff7a18; }
+  .btn-wechat { width:100%; margin-top:22px; padding:14px; border:none; border-radius:24px; background:linear-gradient(90deg,#ff7a18,#ff9436); color:#fff; font-size:16px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .btn-wechat:active { opacity:.85; }
+  .btn-other { width:100%; margin-top:12px; padding:13px; border-radius:24px; background:#fff; border:1px solid #e5e8eb; color:#555; font-size:14px; cursor:pointer; }
+  .btn-other:active { background:#fafafa; }
+  .agreement { margin-top:22px; display:flex; align-items:flex-start; font-size:12px; color:#8a919c; line-height:1.6; }
+  .agree-check { width:16px; height:16px; border:1.5px solid #c8cdd2; border-radius:50%; margin-right:8px; flex-shrink:0; margin-top:2px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; transition:all .15s; }
+  .agree-check.checked { background:#ff7a18; border-color:#ff7a18; }
+  .agree-check.checked::after { content:'✓'; }
+  .agreement a { color:#ff7a18; text-decoration:none; }
+  .toast { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.75); color:#fff; padding:12px 22px; border-radius:8px; font-size:14px; z-index:999; display:none; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="logo-area">
+    <img class="logo-img" src="../assets/img/logo_nav.png" alt="logo" onerror="this.style.display='none'">
+    <div class="logo-name">誉友科技</div>
+    <div class="logo-sub">YUYOO TECHNOLOGY</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">申请获取以下权限</div>
+    <div class="panel-desc">获取你的<span class="scope">公开信息（昵称、头像、地区等）</span>，用于完善账号资料</div>
+    <button class="btn-wechat" onclick="doLogin()">微信授权登录</button>
+    <button class="btn-other" onclick="goSms()">手机号验证码登录</button>
+
+    <div class="agreement">
+      <div class="agree-check" id="agreeCk" onclick="toggleAgree()"></div>
+      <div>已阅读并同意 <a onclick="goPage('418829')">《用户注册协议》</a> 与 <a onclick="goPage('418828')">《隐私协议》</a></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  var agreed = false;
+  function toggleAgree() {
+    agreed = !agreed;
+    document.getElementById('agreeCk').classList.toggle('checked', agreed);
+  }
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1600);
+  }
+  function goPage(id) { window.location.href = id + '.html'; }
+  function goSms() { window.location.href = '429238.html'; }
+
+  function doLogin() {
+    if (!agreed) { showToast('请先阅读并同意协议'); return; }
+    localStorage.setItem('yuyoo_user', JSON.stringify({ name:'誉友用户', phone:'138****8888', avatar:'', loginAt:Date.now() }));
+    showToast('登录成功');
+    setTimeout(function(){ window.location.href = '418848.html'; }, 1200);
+  }
+</script>
+</body>
+</html>

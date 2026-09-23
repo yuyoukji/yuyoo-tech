@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>个人中心</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  /* 顶部红色弧形 */
+  .header { position:relative; padding:56px 18px 0; background:linear-gradient(160deg,#ff7a18 0%,#ff9436 100%); border-radius:0 0 28px 28px; overflow:hidden; }
+  .header::after { content:''; position:absolute; right:-40px; top:-30px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.08); }
+  .header::before { content:''; position:absolute; left:-50px; bottom:-40px; width:180px; height:180px; border-radius:50%; background:rgba(255,255,255,0.06); }
+  .user-row { position:relative; z-index:2; display:flex; align-items:center; padding-bottom:44px; }
+  .avatar { width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.25); border:2px solid rgba(255,255,255,0.6); display:flex; align-items:center; justify-content:center; font-size:30px; overflow:hidden; }
+  .avatar img { width:100%; height:100%; object-fit:cover; }
+  .user-info { margin-left:14px; flex:1; }
+  .user-name { font-size:18px; font-weight:700; color:#fff; }
+  .user-phone { font-size:13px; color:rgba(255,255,255,0.85); margin-top:5px; }
+  .login-tip { font-size:15px; color:#fff; }
+  .user-arrow { font-size:18px; color:rgba(255,255,255,0.8); }
+  /* 功能卡片上浮 */
+  .card-wrap { padding:0 14px; margin-top:-30px; position:relative; z-index:3; }
+  .card { background:#fff; border-radius:14px; padding:6px 0; box-shadow:0 4px 14px rgba(0,0,0,0.05); }
+  .card-title { padding:12px 16px 4px; font-size:13px; color:#b0b8c4; }
+  .cell { display:flex; align-items:center; padding:14px 16px; cursor:pointer; }
+  .cell:not(:last-child) { border-bottom:1px solid #f5f6f8; }
+  .cell:active { background:#fafafa; }
+  .cell-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; margin-right:12px; }
+  .c-orange { background:#fff3e8; }
+  .c-red { background:#ffecec; }
+  .c-blue { background:#e8f3ff; }
+  .c-green { background:#e8f7ee; }
+  .cell-label { flex:1; font-size:15px; color:#1a1a1a; }
+  .cell-badge { font-size:12px; color:#b0b8c4; margin-right:6px; }
+  .cell-arrow { font-size:14px; color:#c8cdd2; }
+  .toast { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.75); color:#fff; padding:12px 22px; border-radius:8px; font-size:14px; z-index:999; display:none; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="header">
+    <div class="user-row" id="userRow" onclick="onUserClick()">
+      <div class="avatar" id="avatarBox">👤</div>
+      <div class="user-info" id="userInfo">
+        <div class="login-tip">请登录</div>
+      </div>
+      <div class="user-arrow">›</div>
+    </div>
+  </div>
+
+  <div class="card-wrap">
+    <div class="card">
+      <div class="card-title">我的功能</div>
+      <div class="cell" onclick="goPage('418800')">
+        <div class="cell-icon c-orange">🎧</div>
+        <div class="cell-label">联系我们</div>
+        <div class="cell-arrow">›</div>
+      </div>
+      <div class="cell" onclick="goPage('418856')">
+        <div class="cell-icon c-red">⭐</div>
+        <div class="cell-label">我的收藏</div>
+        <div class="cell-badge" id="favCount"></div>
+        <div class="cell-arrow">›</div>
+      </div>
+      <div class="cell" onclick="goPage('418813')">
+        <div class="cell-icon c-blue">💬</div>
+        <div class="cell-label">意见反馈</div>
+        <div class="cell-arrow">›</div>
+      </div>
+      <div class="cell" onclick="goPage('418816')">
+        <div class="cell-icon c-green">⚙️</div>
+        <div class="cell-label">设置</div>
+        <div class="cell-arrow">›</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1500);
+  }
+  function goPage(id) { window.location.href = id + '.html'; }
+
+  function getUser() {
+    try { return JSON.parse(localStorage.getItem('yuyoo_user') || 'null'); }
+    catch (e) { return null; }
+  }
+
+  // 收藏数量
+  function favCount() {
+    try { return (JSON.parse(localStorage.getItem('yuyoo_favs') || '[]')).length; }
+    catch (e) { return 0; }
+  }
+
+  function renderUser() {
+    var user = getUser();
+    var info = document.getElementById('userInfo');
+    var avatar = document.getElementById('avatarBox');
+    if (user && user.phone) {
+      if (user.avatar) {
+        avatar.innerHTML = '<img src="' + user.avatar + '">';
+      } else {
+        avatar.textContent = '👤';
+      }
+      var phone = user.phone;
+      var masked = phone.length === 11 ? phone.slice(0,3) + '****' + phone.slice(7) : phone;
+      info.innerHTML =
+        '<div class="user-name">' + escapeHtml(user.name || '誉友用户') + '</div>' +
+        '<div class="user-phone">' + masked + '</div>';
+    } else {
+      avatar.textContent = '👤';
+      info.innerHTML = '<div class="login-tip">请登录</div>';
+    }
+    var fc = favCount();
+    document.getElementById('favCount').textContent = fc > 0 ? fc + ' 条' : '';
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    });
+  }
+
+  function onUserClick() {
+    if (getUser()) { goPage('418855'); }   // 我的资料
+    else { goPage('426384'); }              // 去登录
+  }
+
+  renderUser();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# 不入库的冗余/本地文件
+preview.html
+启动.bat
+project.config.json
+project.private.config.json
+*.log

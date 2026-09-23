@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>誉友科技有限公司 - 产品展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", -apple-system, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* 顶部栏 */
+        .top-bar {
+            height: 56px;
+            background: linear-gradient(90deg, #ff7a18 0%, #ff9436 100%);
+            display: flex;
+            align-items: center;
+            padding: 0 22px;
+            box-shadow: 0 2px 8px rgba(255, 122, 24, 0.35);
+            z-index: 100;
+        }
+        .top-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            margin-right: 12px;
+            background: #fff;
+            padding: 3px;
+            box-sizing: border-box;
+        }
+        .top-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+        .top-right {
+            margin-left: auto;
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.18);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        /* 主体内容 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        /* 左侧菜单 */
+        .left-panel {
+            width: 250px;
+            background: #1f2429;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .search-box {
+            margin: 15px 15px 10px;
+            padding: 9px 14px;
+            border: none;
+            border-radius: 20px;
+            background: #2b3238;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-box:focus {
+            background: #343c43;
+            box-shadow: 0 0 0 2px rgba(255,122,24,0.4);
+        }
+        .search-box::placeholder {
+            color: #7c8792;
+        }
+        .page-info {
+            padding: 0 18px 12px;
+            font-size: 11px;
+            color: #6b7680;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .menu-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 8px 12px;
+        }
+        .menu-group {
+            margin-bottom: 4px;
+        }
+        .menu-group-title {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #d7dde3;
+            font-weight: 600;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        .menu-group-title:hover {
+            background: #2b3238;
+        }
+        .menu-group-title .arrow {
+            margin-right: 8px;
+            font-size: 11px;
+            color: #ff8c3a;
+            transition: transform 0.2s;
+        }
+        .menu-group.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+        .menu-group-items {
+            overflow: hidden;
+        }
+        .menu-group.collapsed .menu-group-items {
+            display: none;
+        }
+        .menu-item {
+            padding: 9px 14px 9px 36px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #9aa5af;
+            border-radius: 8px;
+            margin: 1px 0;
+            transition: all 0.2s;
+        }
+        .menu-item:hover {
+            background: #2b3238;
+            color: #fff;
+        }
+        .menu-item.active {
+            background: linear-gradient(90deg, #ff7a18 0%, #ff9436 100%);
+            color: #fff;
+            font-weight: 600;
+        }
+        /* 右侧预览区 */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 34px;
+            overflow: auto;
+            background: radial-gradient(circle at 50% 30%, #3a4148 0%, #23282d 70%);
+        }
+        .phone-frame {
+            width: 375px;
+            height: 750px;
+            border: 12px solid #0d0f11;
+            border-radius: 48px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.55), 0 0 0 1px #3a4148, inset 0 0 0 2px #000;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 24px;
+            background: #0d0f11;
+            border-radius: 0 0 16px 16px;
+            z-index: 1000;
+        }
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        /* 滚动条美化 */
+        .menu-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        .menu-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .menu-list::-webkit-scrollbar-thumb {
+            background: #3c444c;
+            border-radius: 3px;
+        }
+        .menu-list::-webkit-scrollbar-thumb:hover {
+            background: #ff8c3a;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部栏 -->
+    <div class="top-bar">
+        <img src="assets/img/logo_nav.png" class="top-logo" alt="誉友科技有限公司">
+        <div class="top-title">誉友科技有限公司 · 产品展示</div>
+        <div class="top-right">共 20 个页面</div>
+    </div>
+
+    <!-- 主体内容 -->
+    <div class="main-content">
+        <!-- 左侧菜单 -->
+        <div class="left-panel">
+            <input type="text" class="search-box" id="pageSearch" placeholder="搜索页面..." oninput="filterPages(this.value)">
+            <div class="page-info">页面列表</div>
+            <div class="menu-list">
+                <!-- tabBar -->
+                <div class="menu-group">
+                    <div class="menu-group-title" onclick="toggleGroup(this)">
+                        <span class="arrow">▼</span> tabBar导航
+                    </div>
+                    <div class="menu-group-items">
+                        <div class="menu-item active" data-page="426384">小程序登录</div>
+                        <div class="menu-item" data-page="418843">产品首页</div>
+                        <div class="menu-item" data-page="418848">个人中心</div>
+                        <div class="menu-item" data-page="419940">产品分类</div>
+                        <div class="menu-item" data-page="420306">公司介绍</div>
+                    </div>
+                </div>
+                <!-- 首页 -->
+                <div class="menu-group">
+                    <div class="menu-group-title" onclick="toggleGroup(this)">
+                        <span class="arrow">▼</span> 首页页面
+                    </div>
+                    <div class="menu-group-items">
+                        <div class="menu-item" data-page="418861">搜索</div>
+                        <div class="menu-item" data-page="418913">商品详情</div>
+                        <div class="menu-item" data-page="420307">搜索结果</div>
+                    </div>
+                </div>
+                <!-- 我的 -->
+                <div class="menu-group">
+                    <div class="menu-group-title" onclick="toggleGroup(this)">
+                        <span class="arrow">▼</span> 我的页面
+                    </div>
+                    <div class="menu-group-items">
+                        <div class="menu-item" data-page="418851">消息详情</div>
+                        <div class="menu-item" data-page="418853">平台公告</div>
+                        <div class="menu-item" data-page="418855">我的资料</div>
+                        <div class="menu-item" data-page="418856">我的收藏</div>
+                    </div>
+                </div>
+                <!-- 登录注册 -->
+                <div class="menu-group">
+                    <div class="menu-group-title" onclick="toggleGroup(this)">
+                        <span class="arrow">▼</span> 登录注册
+                    </div>
+                    <div class="menu-group-items">
+                        <div class="menu-item" data-page="418828">隐私政策</div>
+                        <div class="menu-item" data-page="418829">注册协议</div>
+                        <div class="menu-item" data-page="429238">验证码登录</div>
+                    </div>
+                </div>
+                <!-- 系统设置 -->
+                <div class="menu-group">
+                    <div class="menu-group-title" onclick="toggleGroup(this)">
+                        <span class="arrow">▼</span> 系统设置
+                    </div>
+                    <div class="menu-group-items">
+                        <div class="menu-item" data-page="418799">关于我们</div>
+                        <div class="menu-item" data-page="418800">联系客服</div>
+                        <div class="menu-item" data-page="418812">反馈记录</div>
+                        <div class="menu-item" data-page="418813">意见反馈</div>
+                        <div class="menu-item" data-page="418816">系统设置</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧手机预览 -->
+        <div class="right-panel">
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <iframe class="phone-screen" id="phoneScreen" src="pages/426384.html"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 展开/收起分组
+        function toggleGroup(el) {
+            el.parentElement.classList.toggle('collapsed');
+        }
+
+        // 搜索过滤页面
+        function filterPages(keyword) {
+            var kw = keyword.trim().toLowerCase();
+            var groups = document.querySelectorAll('.menu-group');
+            groups.forEach(function(group) {
+                var items = group.querySelectorAll('.menu-item');
+                var groupVisible = false;
+                items.forEach(function(item) {
+                    var text = item.textContent.trim().toLowerCase();
+                    var visible = kw === '' || text.indexOf(kw) !== -1;
+                    item.style.display = visible ? '' : 'none';
+                    if (visible) groupVisible = true;
+                });
+                // 分组标题仅在有关键词且有匹配项时显示
+                var title = group.querySelector('.menu-group-title');
+                title.style.display = (kw === '' || groupVisible) ? '' : 'none';
+                // 有关键词时自动展开
+                if (kw !== '') group.classList.remove('collapsed');
+            });
+        }
+
+        // 点击菜单切换页面
+        document.querySelectorAll('.menu-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                // 更新选中状态
+                document.querySelectorAll('.menu-item').forEach(function(i) {
+                    i.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                // 切换iframe页面
+                var pageId = this.getAttribute('data-page');
+                document.getElementById('phoneScreen').src = 'pages/' + pageId + '.html';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>搜索</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { display:flex; align-items:center; padding:12px 16px; background:#fff; position:sticky; top:0; z-index:10; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  .back { width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#1a1a1a; cursor:pointer; }
+  .search-box { flex:1; display:flex; align-items:center; background:#f0f2f5; border-radius:18px; padding:8px 14px; margin:0 10px; }
+  .search-box input { flex:1; border:none; background:transparent; outline:none; font-size:14px; color:#1a1a1a; }
+  .search-box input::placeholder { color:#a0a8b4; }
+  .search-btn { font-size:14px; color:#ff7a18; font-weight:600; cursor:pointer; padding:6px 4px; }
+  .section { padding:18px 16px 8px; }
+  .section-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .section-title .t { font-size:15px; font-weight:700; color:#1a1a1a; }
+  .section-title .clear { font-size:12px; color:#a0a8b4; cursor:pointer; }
+  .tags { display:flex; flex-wrap:wrap; gap:10px; }
+  .tag { padding:7px 14px; font-size:13px; background:#fff; color:#555; border-radius:16px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .tag:active { background:#fff3e8; color:#ff7a18; }
+  .hot { padding:4px 16px 20px; }
+  .empty-hist { text-align:center; color:#a0a8b4; font-size:13px; padding:20px 0; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="back" onclick="history.back()">‹</div>
+    <div class="search-box">
+      <input id="kw" placeholder="搜索产品 / 解决方案" autofocus onkeydown="if(event.key==='Enter')doSearch()">
+    </div>
+    <div class="search-btn" onclick="doSearch()">搜索</div>
+  </div>
+
+  <div class="section" id="histSection">
+    <div class="section-title">
+      <div class="t">🕐 历史搜索</div>
+      <div class="clear" onclick="clearHist()">清空</div>
+    </div>
+    <div class="tags" id="histTags"></div>
+    <div class="empty-hist" id="histEmpty">暂无历史记录</div>
+  </div>
+
+  <div class="hot">
+    <div class="section-title" style="margin-top:6px;">
+      <div class="t">🔥 热门搜索</div>
+    </div>
+    <div class="tags" id="hotTags"></div>
+  </div>
+
+<script src="../shared/data.js"></script>
+  <script src="../assets/js/products.js"></script>
+<script>
+  var HIST_KEY = 'yuyoo_search_hist';
+
+  function getHist() { try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch(e){ return []; } }
+  function saveHist(arr) { localStorage.setItem(HIST_KEY, JSON.stringify(arr.slice(0, 10))); }
+
+  function renderHist() {
+    var arr = getHist();
+    var box = document.getElementById('histTags');
+    var empty = document.getElementById('histEmpty');
+    box.innerHTML = '';
+    empty.style.display = arr.length ? 'none' : 'block';
+    arr.forEach(function(k) {
+      var d = document.createElement('div');
+      d.className = 'tag'; d.textContent = k;
+      d.onclick = function(){ document.getElementById('kw').value = k; doSearch(); };
+      box.appendChild(d);
+    });
+  }
+
+  function renderHot() {
+    var box = document.getElementById('hotTags');
+    YUYOO_PRODUCTS.forEach(function(p) {
+      var d = document.createElement('div');
+      d.className = 'tag'; d.textContent = p.name;
+      d.onclick = function(){ document.getElementById('kw').value = p.name; doSearch(); };
+      box.appendChild(d);
+    });
+  }
+
+  function doSearch() {
+    var kw = document.getElementById('kw').value.trim();
+    if (!kw) return;
+    var arr = getHist();
+    arr = arr.filter(function(k){ return k !== kw; });
+    arr.unshift(kw);
+    saveHist(arr);
+    window.location.href = '420307.html?kw=' + encodeURIComponent(kw);
+  }
+
+  function clearHist() { localStorage.removeItem(HIST_KEY); renderHist(); }
+
+  renderHist();
+  renderHot();
+</script>
+</body>
+</html>

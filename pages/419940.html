@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>产品分类</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; display:flex; }
+  /* 左侧分类导航 */
+  .side { width:96px; flex-shrink:0; background:#f0f1f3; min-height:100vh; overflow-y:auto; }
+  .cat-item { padding:17px 8px; font-size:14px; color:#555; text-align:center; cursor:pointer; border-left:3px solid transparent; transition:all .15s; line-height:1.4; }
+  .cat-item.active { background:#fff; color:#ff7a18; font-weight:600; border-left-color:#ff7a18; }
+  .cat-item:not(.active):active { background:#e8eaed; }
+  /* 右侧产品区 */
+  .main { flex:1; padding:14px; overflow-y:auto; max-height:100vh; }
+  .main-title { font-size:15px; font-weight:600; color:#1a1a1a; margin-bottom:12px; }
+  .prod-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .prod-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); cursor:pointer; transition:transform .1s; }
+  .prod-card:active { transform:scale(0.97); }
+  .prod-img { width:100%; height:110px; object-fit:cover; display:block; }
+  .prod-body { padding:10px; }
+  .prod-name { font-size:14px; font-weight:600; color:#1a1a1a; }
+  .prod-slogan { font-size:11px; color:#ff7a18; margin-top:4px; }
+  .empty { grid-column:1/-1; text-align:center; padding:60px 0; color:#b0b8c4; font-size:13px; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="side" id="side"></div>
+  <div class="main">
+    <div class="main-title" id="mainTitle">全部产品</div>
+    <div class="prod-grid" id="grid"></div>
+  </div>
+
+<script src="../shared/data.js"></script>
+  <script src="../assets/js/products.js"></script>
+<script>
+  var curCat = 'all';
+
+  function renderSide() {
+    var html = '<div class="cat-item active" data-cat="all">全部</div>';
+    YUYOO_CATEGORIES.forEach(function(c) {
+      html += '<div class="cat-item" data-cat="' + c.id + '">' + c.name + '</div>';
+    });
+    document.getElementById('side').innerHTML = html;
+    document.getElementById('side').addEventListener('click', function(e) {
+      var item = e.target.closest('.cat-item');
+      if (!item) return;
+      document.querySelectorAll('.cat-item').forEach(function(el){ el.classList.remove('active'); });
+      item.classList.add('active');
+      curCat = item.getAttribute('data-cat');
+      renderMain();
+    });
+  }
+
+  function renderMain() {
+    var title = '全部产品';
+    if (curCat !== 'all') {
+      var c = YUYOO_CATEGORIES.find(function(x){ return x.id === curCat; });
+      title = c ? c.name : '产品';
+    }
+    document.getElementById('mainTitle').textContent = title;
+
+    var list = curCat === 'all'
+      ? YUYOO_PRODUCTS
+      : YUYOO_PRODUCTS.filter(function(p){ return p.category === curCat; });
+
+    var grid = document.getElementById('grid');
+    if (!list.length) {
+      grid.innerHTML = '<div class="empty">该分类暂无产品</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function(p) {
+      html += '<div class="prod-card" onclick="openDetail(\'' + p.id + '\')">' +
+        '<img class="prod-img" src="' + p.image + '" onerror="this.onerror=null;this.src=yuyooProductImage(p.name)">' +
+        '<div class="prod-body">' +
+          '<div class="prod-name">' + p.name + '</div>' +
+          '<div class="prod-slogan">' + p.slogan + '</div>' +
+        '</div></div>';
+    });
+    grid.innerHTML = html;
+  }
+
+  function openDetail(id) {
+    window.location.href = '418913.html?id=' + id;
+  }
+
+  renderSide();
+  renderMain();
+</script>
+</body>
+</html>

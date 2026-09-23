@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>商品详情</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; padding-bottom:80px; }
+  .nav { position:sticky; top:0; z-index:100; height:50px; display:flex; align-items:center; padding:0 14px; background:linear-gradient(160deg,#1a7fd4,#3aa0ee); }
+  .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; cursor:pointer; border-radius:50%; }
+  .nav-back:active { background:rgba(255,255,255,0.15); }
+  .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#fff; }
+  .nav-fav { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; cursor:pointer; }
+  .banner { background:linear-gradient(160deg,#1a7fd4,#3aa0ee); padding:20px 18px 26px; color:#fff; }
+  .banner-tag { display:inline-block; font-size:11px; background:rgba(255,255,255,0.2); padding:3px 10px; border-radius:4px; margin-bottom:10px; }
+  .banner-name { font-size:22px; font-weight:700; }
+  .banner-sub { font-size:13px; opacity:0.85; margin-top:6px; }
+  .block { background:#fff; margin-top:12px; padding:16px; }
+  .block-title { display:inline-block; font-size:15px; font-weight:600; color:#fff; background:linear-gradient(90deg,#ff7a18,#ff9436); padding:6px 14px; border-radius:6px; margin-bottom:14px; }
+  .adv-item { display:flex; align-items:flex-start; margin-bottom:12px; }
+  .adv-dot { width:6px; height:6px; border-radius:50%; background:#1a7fd4; margin-top:7px; margin-right:10px; flex-shrink:0; }
+  .adv-text { font-size:14px; color:#333; line-height:1.6; }
+  .spec-row { display:flex; padding:10px 0; border-bottom:1px dashed #eee; font-size:13px; }
+  .spec-label { width:110px; color:#8a919c; flex-shrink:0; }
+  .spec-value { flex:1; color:#1a7fd4; font-weight:600; }
+  .desc { font-size:14px; color:#4a5058; line-height:1.8; text-align:justify; }
+  .use-row { display:flex; padding:9px 0; font-size:13px; }
+  .use-label { width:110px; color:#8a919c; flex-shrink:0; }
+  .use-value { flex:1; color:#333; }
+  .bottom-bar { position:fixed; bottom:0; left:0; right:0; display:flex; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); background:#fff; box-shadow:0 -2px 10px rgba(0,0,0,0.06); }
+  .btn-fav { flex:1; padding:12px; border-radius:22px; border:1.5px solid #ff7a18; color:#ff7a18; background:#fff; font-size:15px; font-weight:600; cursor:pointer; margin-right:10px; }
+  .btn-fav.faved { background:#fff3e8; }
+  .btn-buy { flex:2; padding:12px; border:none; border-radius:22px; background:linear-gradient(90deg,#ff7a18,#ff9436); color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+  .btn-buy:active { opacity:.85; }
+  .btn-fav:active { opacity:.85; }
+  .toast { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.75); color:#fff; padding:12px 22px; border-radius:8px; font-size:14px; z-index:999; display:none; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-back" onclick="history.back()">‹</div>
+    <div class="nav-title">商品详情</div>
+    <div class="nav-fav" id="navFav" onclick="toggleFav()">☆</div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-tag" id="pCat">软件开发</div>
+    <div class="banner-name" id="pName">誉友ERP管理系统</div>
+    <div class="banner-sub" id="pSlogan">企业资源 · 一体化管理</div>
+  </div>
+
+  <div class="block">
+    <div class="block-title">产品亮点</div>
+    <div class="adv-item"><div class="adv-dot"></div><div class="adv-text">进销存一体化：采购、销售、库存数据实时同步</div></div>
+    <div class="adv-item"><div class="adv-dot"></div><div class="adv-text">财务协同：业务单据自动生成财务凭证，对账高效</div></div>
+    <div class="adv-item"><div class="adv-dot"></div><div class="adv-text">数据报表：多维度经营分析，决策有据可依</div></div>
+  </div>
+
+  <div class="block">
+    <div class="block-title">技术栈</div>
+    <div class="spec-row"><div class="spec-label">后端架构</div><div class="spec-value">Spring Boot + MyBatis Plus</div></div>
+    <div class="spec-row"><div class="spec-label">前端框架</div><div class="spec-value" style="color:#333">Vue 3 + Element Plus</div></div>
+    <div class="spec-row"><div class="spec-label">数据库</div><div class="spec-value" style="color:#333">MySQL 8.0 + Redis</div></div>
+    <div class="spec-row"><div class="spec-label">部署方式</div><div class="spec-value" style="color:#333">Docker + Nginx 容器化</div></div>
+    <div class="spec-row"><div class="spec-label">接口规范</div><div class="spec-value" style="color:#333">RESTful API + JWT 鉴权</div></div>
+    <p class="desc" style="margin-top:14px">誉友ERP采用前后端分离架构，支持私有化部署与 SaaS 云端两种模式，内置权限管理、审批流引擎与开放 API，可灵活对接第三方系统。</p>
+  </div>
+
+  <div class="block">
+    <div class="block-title">行业实践</div>
+    <div class="use-row"><div class="use-label">适用行业</div><div class="use-value">制造业、贸易、零售连锁</div></div>
+    <div class="use-row"><div class="use-label">典型案例</div><div class="use-value">某制造企业：库存周转率提升 35%</div></div>
+    <div class="use-row"><div class="use-label">交付方式</div><div class="use-value">源码交付 / SaaS 订阅</div></div>
+    <div class="use-row"><div class="use-label">售后服务</div><div class="use-value">一年免费维护，终身技术支持</div></div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn-fav" id="favBtn" onclick="toggleFav()">☆ 收藏</button>
+    <button class="btn-buy" onclick="showToast('演示版本，暂不支持购买')">立即咨询</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  var FAV_KEY = 'yuyoo_favs';
+  var PRODUCT = {
+    id: 'yy-erp',
+    name: '誉友ERP管理系统',
+    slogan: '企业资源 · 一体化管理',
+    category: '软件开发',
+    image: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#e8f0fb" width="200" height="200"/><circle cx="100" cy="80" r="40" fill="#1a7fd4"/><rect x="60" y="120" width="80" height="60" rx="8" fill="#ff7a18"/><text x="100" y="155" font-size="14" fill="#fff" text-anchor="middle">誉友</text></svg>')
+  };
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1500);
+  }
+  function getFavs() {
+    try { return JSON.parse(localStorage.getItem(FAV_KEY) || '[]'); }
+    catch (e) { return []; }
+  }
+  function saveFavs(list) { localStorage.setItem(FAV_KEY, JSON.stringify(list)); }
+  function isFav() { return getFavs().some(function(f){ return f.id === PRODUCT.id; }); }
+
+  function refreshFavUI() {
+    var faved = isFav();
+    document.getElementById('navFav').textContent = faved ? '★' : '☆';
+    var btn = document.getElementById('favBtn');
+    btn.textContent = faved ? '★ 已收藏' : '☆ 收藏';
+    btn.classList.toggle('faved', faved);
+  }
+
+  function toggleFav() {
+    var list = getFavs();
+    if (isFav()) {
+      list = list.filter(function(f){ return f.id !== PRODUCT.id; });
+      showToast('已取消收藏');
+    } else {
+      list.unshift(PRODUCT);
+      showToast('已加入收藏');
+    }
+    saveFavs(list);
+    refreshFavUI();
+  }
+
+  refreshFavUI();
+</script>
+</body>
+</html>

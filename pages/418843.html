@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>产品首页</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  /* 红色头部 */
+  .header { background:linear-gradient(160deg,#e60012,#f53f4b); padding:14px 16px 20px; border-radius:0 0 20px 20px; }
+  .header-top { display:flex; align-items:center; margin-bottom:14px; }
+  .logo { width:34px; height:34px; border-radius:8px; object-fit:cover; background:#fff; }
+  .brand-name { margin-left:10px; font-size:17px; font-weight:700; color:#fff; flex:1; }
+  .msg-icon { position:relative; width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-size:19px; color:#fff; cursor:pointer; }
+  .msg-dot { position:absolute; top:4px; right:5px; width:8px; height:8px; background:#ffd21e; border-radius:50%; border:1.5px solid #e60012; }
+  .search-bar { display:flex; align-items:center; background:#fff; border-radius:20px; padding:9px 14px; cursor:pointer; }
+  .search-bar .icon { font-size:14px; color:#b0b8c4; margin-right:8px; }
+  .search-bar .placeholder { font-size:13px; color:#b0b8c4; }
+  /* banner 轮播 - 真实背景图 */
+  .banner-wrap { padding:14px 16px 0; }
+  .banner { position:relative; border-radius:14px; overflow:hidden; height:150px; }
+  .banner-slide { position:absolute; inset:0; display:flex; align-items:center; padding:0 24px; opacity:0; transition:opacity .8s ease-in-out; background-size:cover; background-position:center; }
+  .banner-slide.show { opacity:1; }
+  .banner-slide::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 55%, rgba(0,0,0,0.05) 100%); }
+  .banner-text { position:relative; z-index:1; }
+  .banner-text h3 { font-size:19px; font-weight:700; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.4); }
+  .banner-text p { font-size:12px; color:rgba(255,255,255,0.92); margin-top:6px; text-shadow:0 1px 3px rgba(0,0,0,0.4); }
+  .banner-dots { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:6px; z-index:2; }
+  .dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.5); cursor:pointer; transition:all .3s; }
+  .dot.active { background:#fff; width:16px; border-radius:3px; }
+  /* 分类快捷 */
+  .quick-cats { display:flex; padding:18px 16px 4px; gap:8px; overflow-x:auto; }
+  .qcat { flex-shrink:0; padding:8px 14px; font-size:13px; background:#fff; color:#555; border-radius:16px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.04); transition:all .25s; }
+  .qcat:active { transform:scale(0.98); }
+  .qcat.active { background:#ff7a18; color:#fff; font-weight:600; }
+  /* 为您推荐 */
+  .section-head { display:flex; align-items:center; justify-content:center; padding:20px 0 4px; }
+  .section-head .line { width:24px; height:1px; background:#d8dce0; }
+  .section-head .txt { margin:0 12px; font-size:16px; font-weight:700; color:#1a1a1a; }
+  .prod-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:14px 16px 20px; }
+  .prod-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); cursor:pointer; transition:transform .1s; }
+  .prod-card:active { transform:scale(0.97); }
+  .prod-img { width:100%; height:110px; object-fit:cover; display:block; }
+  .prod-body { padding:10px; }
+  .prod-name { font-size:14px; font-weight:600; color:#1a1a1a; }
+  .prod-slogan { font-size:11px; color:#ff7a18; margin-top:4px; }
+  .empty { text-align:center; padding:60px 0; color:#b0b8c4; font-size:13px; grid-column:1/-1; }
+  /* 固定背景区块 - 技术实力 */
+  .fixed-bg { position:relative; height:280px; margin:18px 0; background-image:url('../assets/img/products/server-room.jpg'); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; }
+  .fixed-bg::before { content:''; position:absolute; inset:0; background:rgba(10,20,40,0.68); }
+  .fixed-bg-inner { position:relative; z-index:1; text-align:center; color:#fff; padding:0 20px; width:100%; }
+  .fixed-bg-title { font-size:20px; font-weight:700; text-shadow:0 2px 6px rgba(0,0,0,0.5); }
+  .fixed-bg-sub { font-size:13px; color:rgba(255,255,255,0.85); margin-top:8px; }
+  .stats { display:flex; justify-content:space-around; margin-top:26px; }
+  .stat { text-align:center; }
+  .stat-num { font-size:26px; font-weight:800; color:#ff9436; }
+  .stat-label { font-size:12px; color:rgba(255,255,255,0.8); margin-top:4px; }
+  /* 支持 fixed 的环境应用固定背景 */
+  @supports (background-attachment: fixed) {
+    .fixed-bg { background-attachment: fixed; }
+  }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="header">
+    <div class="header-top">
+      <img class="logo" src="../assets/img/logo_nav.png" onerror="this.style.background='#fff'">
+      <div class="brand-name">誉友科技</div>
+      <div class="msg-icon" onclick="openPage('418851')">🔔<div class="msg-dot"></div></div>
+    </div>
+    <div class="search-bar" onclick="openPage('418861')">
+      <div class="icon">🔍</div>
+      <div class="placeholder">找产品 / 解决方案</div>
+    </div>
+  </div>
+
+  <div class="banner-wrap">
+    <div class="banner" id="banner"></div>
+  </div>
+
+  <div class="quick-cats" id="quickCats"></div>
+
+  <!-- 固定背景区块：技术实力 -->
+  <div class="fixed-bg">
+    <div class="fixed-bg-inner">
+      <div class="fixed-bg-title">技术实力 稳定保障</div>
+      <div class="fixed-bg-sub">自有机房 · 数据安全 · 7x24 运维监控</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-num">100+</div><div class="stat-label">交付项目</div></div>
+        <div class="stat"><div class="stat-num">50+</div><div class="stat-label">服务客户</div></div>
+        <div class="stat"><div class="stat-num">98%</div><div class="stat-label">客户满意度</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="line"></div>
+    <div class="txt" id="sectionTitle">为您推荐</div>
+    <div class="line"></div>
+  </div>
+  <div class="prod-grid" id="grid"></div>
+
+<script src="../shared/data.js"></script>
+  <script src="../assets/js/products.js"></script>
+<script>
+  var BANNERS = [
+    { img:'../assets/img/products/banner-code.jpg',   title:'数字化转型 赋能企业', sub:'软件开发 云服务 数据驱动' },
+    { img:'../assets/img/products/banner-cloud.jpg',  title:'誉友ERP 管理提效',    sub:'进销存+财务 一体化方案' },
+    { img:'../assets/img/products/banner-mobile.jpg', title:'小程序·APP定制',     sub:'轻量触达 即用即走' }
+  ];
+
+  function openPage(id) { window.location.href = id + '.html'; }
+  function openDetail(id) { window.location.href = '418913.html?id=' + id; }
+
+  // banner 轮播
+  function renderBanner() {
+    var html = '';
+    BANNERS.forEach(function(b, i) {
+      html += '<div class="banner-slide' + (i === 0 ? ' show' : '') + '" style="background-image:url(\'' + b.img + '\')">' +
+        '<div class="banner-text"><h3>' + b.title + '</h3><p>' + b.sub + '</p></div></div>';
+    });
+    html += '<div class="banner-dots">';
+    BANNERS.forEach(function(b, i) {
+      html += '<div class="dot' + (i === 0 ? ' active' : '') + '" data-i="' + i + '"></div>';
+    });
+    html += '</div>';
+    var banner = document.getElementById('banner');
+    banner.innerHTML = html;
+    banner.addEventListener('click', function(e) {
+      var d = e.target.closest('.dot');
+      if (d) setSlide(parseInt(d.getAttribute('data-i')));
+    });
+  }
+  var curSlide = 0;
+  function setSlide(i) {
+    curSlide = i;
+    document.querySelectorAll('.banner-slide').forEach(function(el, idx){ el.classList.toggle('show', idx === i); });
+    document.querySelectorAll('.dot').forEach(function(el, idx){ el.classList.toggle('active', idx === i); });
+  }
+  renderBanner();
+  setInterval(function(){ setSlide((curSlide + 1) % BANNERS.length); }, 3500);
+
+  // 分类快捷 - 点击在首页直接筛选产品，不再跳转分类页
+  var curCat = 'all';
+  function renderCats() {
+    var html = '<div class="qcat' + (curCat === 'all' ? ' active' : '') + '" data-cat="all">全部</div>';
+    YUYOO_CATEGORIES.forEach(function(c) {
+      html += '<div class="qcat' + (curCat === c.id ? ' active' : '') + '" data-cat="' + c.id + '">' + c.name + '</div>';
+    });
+    var wrap = document.getElementById('quickCats');
+    wrap.innerHTML = html;
+    wrap.addEventListener('click', function(e) {
+      var t = e.target.closest('.qcat');
+      if (t) selectCat(t.getAttribute('data-cat'));
+    });
+  }
+  function selectCat(id) {
+    curCat = id;
+    document.querySelectorAll('.qcat').forEach(function(el) {
+      el.classList.toggle('active', el.getAttribute('data-cat') === id);
+    });
+    renderProds();
+  }
+
+  // 推荐产品（按分类筛选）
+  function renderProds() {
+    var list = curCat === 'all'
+      ? YUYOO_PRODUCTS
+      : YUYOO_PRODUCTS.filter(function(p){ return p.category === curCat; });
+    var cat = YUYOO_CATEGORIES.find(function(c){ return c.id === curCat; });
+    document.getElementById('sectionTitle').textContent = curCat === 'all' ? '为您推荐' : cat.name;
+
+    if (!list.length) {
+      document.getElementById('grid').innerHTML = '<div class="empty">该分类暂无产品</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function(p) {
+      html += '<div class="prod-card" onclick="openDetail(\'' + p.id + '\')">' +
+        '<img class="prod-img" src="' + p.image + '" onerror="this.onerror=null;this.src=yuyooProductImage(p.name)">' +
+        '<div class="prod-body">' +
+          '<div class="prod-name">' + p.name + '</div>' +
+          '<div class="prod-slogan">' + p.slogan + '</div>' +
+        '</div></div>';
+    });
+    document.getElementById('grid').innerHTML = html;
+  }
+
+  renderCats();
+  renderProds();
+</script>
+</body>
+</html>

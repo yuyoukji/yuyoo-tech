@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>公司介绍</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { position:sticky; top:0; z-index:100; height:50px; background:#fff; display:flex; align-items:center; padding:0 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#333; cursor:pointer; border-radius:50%; }
+  .nav-back:active { background:#f0f0f0; }
+  .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#1a1a1a; }
+  .nav-right { width:36px; }
+  .banner { background:linear-gradient(160deg,#1a7fd4,#3aa0ee); padding:40px 24px 80px; text-align:center; color:#fff; position:relative; overflow:hidden; }
+  .banner::after { content:''; position:absolute; right:-30px; top:-30px; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.08); }
+  .banner::before { content:''; position:absolute; left:-40px; bottom:-30px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.06); }
+  .banner-logo { width:64px; height:64px; margin:0 auto 16px; border-radius:16px; background:rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center; font-size:30px; }
+  .banner-name { font-size:24px; font-weight:700; letter-spacing:2px; }
+  .banner-en { font-size:12px; opacity:0.8; margin-top:6px; letter-spacing:1px; }
+  .banner-slogan { display:inline-block; margin-top:16px; font-size:13px; background:rgba(255,255,255,0.18); padding:6px 18px; border-radius:20px; }
+  .card-wrap { padding:0 16px; margin-top:-44px; position:relative; z-index:2; }
+  .card { background:#fff; border-radius:14px; padding:22px 20px; margin-bottom:14px; box-shadow:0 4px 14px rgba(0,0,0,0.05); }
+  .sec-title { display:flex; align-items:center; margin-bottom:14px; }
+  .sec-bar { width:4px; height:16px; border-radius:2px; background:linear-gradient(180deg,#ff7a18,#ff9436); margin-right:10px; }
+  .sec-text { font-size:16px; font-weight:700; color:#1a1a1a; }
+  .sec-en { font-size:11px; color:#b0b8c4; margin-left:8px; letter-spacing:0.5px; }
+  .about p { font-size:14px; color:#4a5058; line-height:1.9; text-align:justify; margin-bottom:10px; }
+  .value-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .value-item { background:#f7f8fa; border-radius:10px; padding:16px 14px; text-align:center; }
+  .value-icon { font-size:26px; margin-bottom:10px; }
+  .value-name { font-size:14px; font-weight:600; color:#1a1a1a; }
+  .value-desc { font-size:12px; color:#8a919c; line-height:1.6; margin-top:6px; }
+  .biz-item { display:flex; align-items:flex-start; padding:12px 0; border-bottom:1px dashed #f0f0f0; }
+  .biz-item:last-child { border-bottom:none; }
+  .biz-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; margin-right:14px; flex-shrink:0; }
+  .b-blue { background:#e8f0fb; }
+  .b-orange { background:#fff3e8; }
+  .b-green { background:#e8f7ee; }
+  .b-purple { background:#f0e8fb; }
+  .biz-name { font-size:14px; font-weight:600; color:#1a1a1a; }
+  .biz-desc { font-size:12px; color:#8a919c; line-height:1.6; margin-top:4px; }
+  .tech-tags { display:flex; flex-wrap:wrap; gap:10px; }
+  .tech-tag { font-size:13px; color:#1a7fd4; background:#e8f0fb; padding:7px 14px; border-radius:8px; }
+  .stats { display:flex; padding:6px 0; }
+  .stat { flex:1; text-align:center; }
+  .stat-num { font-size:24px; font-weight:700; color:#ff7a18; }
+  .stat-label { font-size:12px; color:#8a919c; margin-top:4px; }
+  .contact-bar { background:linear-gradient(90deg,#ff7a18,#ff9436); border-radius:12px; padding:16px 20px; display:flex; align-items:center; color:#fff; }
+  .contact-label { flex:1; font-size:14px; }
+  .contact-phone { font-size:18px; font-weight:700; letter-spacing:0.5px; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-back" onclick="history.back()">‹</div>
+    <div class="nav-title">公司介绍</div>
+    <div class="nav-right"></div>
+  </div>
+
+  <div class="banner">
+    <div class="banner-logo"><img src="../assets/img/logo_nav.png" style="width:100%;height:100%;object-fit:contain" onerror="this.parentNode.textContent='💻'"></div>
+    <div class="banner-name">誉友科技</div>
+    <div class="banner-en">YUYOO TECHNOLOGY</div>
+    <div class="banner-slogan">专业软件开发 · 数字化解决方案服务商</div>
+  </div>
+
+  <div class="card-wrap">
+    <!-- 公司简介 -->
+    <div class="card about">
+      <div class="sec-title"><div class="sec-bar"></div><div class="sec-text">关于我们</div><div class="sec-en">ABOUT US</div></div>
+      <p>誉友科技有限公司是一家专注于软件开发与数字化服务的科技企业，致力于为企业提供高品质的软件定制开发、移动应用、小程序及云服务解决方案。</p>
+      <p>公司汇聚了一批经验丰富的技术专家与行业顾问，深耕制造、贸易、零售等多个领域，凭借扎实的技术功底与深入的行业理解，已助力众多企业完成数字化转型，实现降本增效与业务增长。</p>
+      <p>我们坚持以客户为中心，以技术为驱动，以质量为生命，持续为客户创造长期价值。</p>
+    </div>
+
+    <!-- 数据统计 -->
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><div class="stat-num">100+</div><div class="stat-label">交付项目</div></div>
+        <div class="stat"><div class="stat-num">50+</div><div class="stat-label">服务客户</div></div>
+        <div class="stat"><div class="stat-num">10+</div><div class="stat-label">行业领域</div></div>
+        <div class="stat"><div class="stat-num">98%</div><div class="stat-label">客户满意度</div></div>
+      </div>
+    </div>
+
+    <!-- 核心价值观 -->
+    <div class="card">
+      <div class="sec-title"><div class="sec-bar"></div><div class="sec-text">核心价值观</div><div class="sec-en">CORE VALUES</div></div>
+      <div class="value-grid">
+        <div class="value-item"><div class="value-icon">🎯</div><div class="value-name">客户至上</div><div class="value-desc">深入理解需求，超越客户期望</div></div>
+        <div class="value-item"><div class="value-icon">💡</div><div class="value-name">创新驱动</div><div class="value-desc">拥抱新技术，持续迭代升级</div></div>
+        <div class="value-item"><div class="value-icon">✨</div><div class="value-name">品质为先</div><div class="value-desc">严格质量把控，交付精品工程</div></div>
+        <div class="value-item"><div class="value-icon">🤝</div><div class="value-name">诚信共赢</div><div class="value-desc">诚信经营，与客户共同成长</div></div>
+      </div>
+    </div>
+
+    <!-- 核心业务 -->
+    <div class="card">
+      <div class="sec-title"><div class="sec-bar"></div><div class="sec-text">核心业务</div><div class="sec-en">BUSINESS</div></div>
+      <div class="biz-item">
+        <div class="biz-icon b-blue">📊</div>
+        <div><div class="biz-name">企业管理软件</div><div class="biz-desc">ERP、CRM、OA 等系统定制开发</div></div>
+      </div>
+      <div class="biz-item">
+        <div class="biz-icon b-orange">📱</div>
+        <div><div class="biz-name">移动应用开发</div><div class="biz-desc">iOS / Android 原生与跨端开发</div></div>
+      </div>
+      <div class="biz-item">
+        <div class="biz-icon b-green">⚡</div>
+        <div><div class="biz-name">微信小程序</div><div class="biz-desc">电商、预约、展示类小程序快速上线</div></div>
+      </div>
+      <div class="biz-item">
+        <div class="biz-icon b-purple">☁️</div>
+        <div><div class="biz-name">云服务与运维</div><div class="biz-desc">上云架构、部署实施、运维托管</div></div>
+      </div>
+    </div>
+
+    <!-- 技术实力 -->
+    <div class="card">
+      <div class="sec-title"><div class="sec-bar"></div><div class="sec-text">技术实力</div><div class="sec-en">TECHNOLOGY</div></div>
+      <div class="tech-tags">
+        <span class="tech-tag">Java / Spring Boot</span>
+        <span class="tech-tag">Vue 3 / React</span>
+        <span class="tech-tag">MySQL / Redis</span>
+        <span class="tech-tag">Docker / K8s</span>
+        <span class="tech-tag">Uni-app / Taro</span>
+        <span class="tech-tag">微服务架构</span>
+      </div>
+    </div>
+
+    <!-- 联系 -->
+    <div class="contact-bar">
+      <div class="contact-label">如需项目咨询，欢迎致电</div>
+      <div class="contact-phone">199-1703-3375</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>消息详情</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { position:sticky; top:0; z-index:100; height:50px; background:#fff; display:flex; align-items:center; padding:0 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#333; cursor:pointer; border-radius:50%; }
+  .nav-back:active { background:#f0f0f0; }
+  .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#1a1a1a; }
+  .nav-right { width:36px; }
+  .card { background:#fff; margin:14px; border-radius:12px; padding:20px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .msg-tag { display:inline-block; font-size:11px; padding:3px 10px; border-radius:4px; background:#fff3e8; color:#ff7a18; font-weight:600; margin-bottom:12px; }
+  .msg-title { font-size:18px; font-weight:700; color:#1a1a1a; line-height:1.5; }
+  .msg-meta { display:flex; align-items:center; margin-top:10px; padding-bottom:14px; border-bottom:1px solid #f5f6f8; font-size:12px; color:#b0b8c4; }
+  .msg-meta .dot { margin:0 8px; }
+  .msg-body { padding-top:16px; }
+  .msg-body p { font-size:15px; color:#4a5058; line-height:1.9; margin-bottom:14px; text-align:justify; }
+  .msg-body h3 { font-size:15px; font-weight:600; color:#1a1a1a; margin:18px 0 10px; }
+  .msg-body ul { margin:0 0 14px 18px; }
+  .msg-body li { font-size:14px; color:#4a5058; line-height:1.8; margin-bottom:6px; }
+  .msg-body .highlight { background:#fff8f2; border-left:3px solid #ff7a18; padding:10px 14px; border-radius:0 8px 8px 0; font-size:14px; color:#4a5058; line-height:1.7; margin:14px 0; }
+  .msg-footer { margin-top:20px; padding-top:14px; border-top:1px solid #f5f6f8; font-size:12px; color:#b0b8c4; text-align:right; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-back" onclick="history.back()">‹</div>
+    <div class="nav-title">消息详情</div>
+    <div class="nav-right"></div>
+  </div>
+
+  <div class="card">
+    <div class="msg-tag">系统通知</div>
+    <div class="msg-title">誉友ERP管理系统 V2.0 版本更新公告</div>
+    <div class="msg-meta">
+      <span>誉友科技产品团队</span><span class="dot">·</span><span>2026-09-24</span><span class="dot">·</span><span>阅读 1286</span>
+    </div>
+    <div class="msg-body">
+      <p>尊敬的用户：</p>
+      <p>您好！为提升系统稳定性与使用体验，誉友ERP管理系统已完成 V2.0 版本升级。本次更新带来了多项功能优化与性能提升，建议您尽快升级使用。</p>
+
+      <h3>一、核心功能更新</h3>
+      <ul>
+        <li><strong>智能审批流</strong>：新增可视化流程设计器，支持多级审批、条件分支与超时提醒。</li>
+        <li><strong>数据大屏</strong>：新增经营驾驶舱，销售、库存、财务核心指标一屏统览。</li>
+        <li><strong>开放API</strong>：开放订单、库存、客户三类接口，支持对接第三方系统。</li>
+        <li><strong>移动端优化</strong>：手机端全面适配，审批、查询、录单随时随地处理。</li>
+      </ul>
+
+      <h3>二、性能与安全</h3>
+      <p>本次升级对数据库查询进行了深度优化，列表页加载速度平均提升 40%；同时修复了若干已知问题，增强了数据加密与访问控制能力。</p>
+
+      <div class="highlight">温馨提示：升级期间系统将短暂维护（预计 30 分钟），请提前保存业务数据。如遇问题，可通过"联系客服"或拨打服务热线 199-1703-3375 获取支持。</div>
+
+      <p>感谢您一直以来对誉友科技的信任与支持，我们将持续为您提供更优质的产品与服务。</p>
+    </div>
+    <div class="msg-footer">誉友科技产品团队<br>2026年9月24日</div>
+  </div>
+</body>
+</html>

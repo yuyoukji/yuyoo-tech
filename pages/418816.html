@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover">
+<title>系统设置</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; }
+  .nav { position:sticky; top:0; z-index:100; height:50px; background:#fff; display:flex; align-items:center; padding:0 14px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+  .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#333; cursor:pointer; border-radius:50%; }
+  .nav-back:active { background:#f0f0f0; }
+  .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#1a1a1a; }
+  .nav-right { width:36px; }
+  .container { padding:14px; }
+  .group { background:#fff; border-radius:12px; margin-bottom:14px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .group-title { padding:12px 16px 6px; font-size:12px; color:#b0b8c4; }
+  .cell { display:flex; align-items:center; padding:15px 16px; cursor:pointer; }
+  .cell:not(:last-child) { border-bottom:1px solid #f5f6f8; }
+  .cell:active { background:#fafafa; }
+  .cell-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:16px; margin-right:12px; background:#fff3e8; }
+  .cell-label { flex:1; font-size:15px; color:#1a1a1a; }
+  .cell-value { font-size:13px; color:#b0b8c4; margin-right:6px; }
+  .cell-arrow { font-size:14px; color:#c8cdd2; }
+  /* 开关 */
+  .switch { position:relative; width:46px; height:26px; background:#d8dce0; border-radius:26px; transition:background .2s; flex-shrink:0; }
+  .switch.on { background:#ff7a18; }
+  .switch::after { content:''; position:absolute; top:2px; left:2px; width:22px; height:22px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+  .switch.on::after { transform:translateX(20px); }
+  .logout-btn { width:100%; padding:14px; border:none; border-radius:12px; background:#fff; color:#e64340; font-size:15px; font-weight:600; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .logout-btn:active { background:#fff5f5; }
+  .toast { position:fixed; top:45%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.75); color:#fff; padding:12px 22px; border-radius:8px; font-size:14px; z-index:999; display:none; }
+  .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; display:none; align-items:center; justify-content:center; }
+  .modal { width:78%; max-width:320px; background:#fff; border-radius:14px; overflow:hidden; }
+  .modal-body { padding:24px 20px; text-align:center; font-size:15px; color:#1a1a1a; line-height:1.5; }
+  .modal-actions { display:flex; border-top:1px solid #f0f0f0; }
+  .modal-btn { flex:1; padding:13px; font-size:15px; cursor:pointer; border:none; background:#fff; }
+  .modal-btn.cancel { color:#666; border-right:1px solid #f0f0f0; }
+  .modal-btn.confirm { color:#e64340; font-weight:600; }
+  .modal-btn:active { background:#f7f7f7; }
+</style>
+<link rel="stylesheet" href="../assets/css/app.css">
+<script src="../assets/js/ui.js"></script>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-back" onclick="history.back()">‹</div>
+    <div class="nav-title">系统设置</div>
+    <div class="nav-right"></div>
+  </div>
+
+  <div class="container">
+    <!-- 通知 -->
+    <div class="group">
+      <div class="group-title">通知</div>
+      <div class="cell">
+        <div class="cell-icon">🔔</div>
+        <div class="cell-label">消息通知</div>
+        <div class="switch" id="swNotice" onclick="toggleSwitch('notice')"></div>
+      </div>
+      <div class="cell">
+        <div class="cell-icon">📣</div>
+        <div class="cell-label">活动推送</div>
+        <div class="switch" id="swPush" onclick="toggleSwitch('push')"></div>
+      </div>
+    </div>
+
+    <!-- 通用 -->
+    <div class="group">
+      <div class="group-title">通用</div>
+      <div class="cell" onclick="clearCache()">
+        <div class="cell-icon">🗑️</div>
+        <div class="cell-label">清除缓存</div>
+        <div class="cell-value" id="cacheSize">0 KB</div>
+        <div class="cell-arrow">›</div>
+      </div>
+      <div class="cell" onclick="openPage('418800')">
+        <div class="cell-icon">ℹ️</div>
+        <div class="cell-label">关于我们</div>
+        <div class="cell-value">V1.0.0</div>
+        <div class="cell-arrow">›</div>
+      </div>
+    </div>
+
+    <!-- 法律与协议 -->
+    <div class="group">
+      <div class="group-title">法律与协议</div>
+      <div class="cell" onclick="openPage('418829')">
+        <div class="cell-icon">📋</div>
+        <div class="cell-label">用户协议</div>
+        <div class="cell-arrow">›</div>
+      </div>
+      <div class="cell" onclick="openPage('418828')">
+        <div class="cell-icon">🛡️</div>
+        <div class="cell-label">隐私政策</div>
+        <div class="cell-arrow">›</div>
+      </div>
+    </div>
+
+    <button class="logout-btn" onclick="confirmLogout()">退出登录</button>
+  </div>
+
+  <!-- 确认弹窗 -->
+  <div class="modal-mask" id="modalMask">
+    <div class="modal">
+      <div class="modal-body" id="modalText">确定退出登录吗？</div>
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeModal()">取消</button>
+        <button class="modal-btn confirm" onclick="doLogout()">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  var PREFIX = 'yuyoo_setting_';
+
+  function getSetting(k, dft) {
+    var v = localStorage.getItem(PREFIX + k);
+    return v === null ? dft : (v === '1');
+  }
+  function setSetting(k, v) {
+    localStorage.setItem(PREFIX + k, v ? '1' : '0');
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1600);
+  }
+
+  // 初始化开关
+  function initSwitch(id, key) {
+    var el = document.getElementById(id);
+    if (getSetting(key, true)) el.classList.add('on');
+  }
+  initSwitch('swNotice', 'notice');
+  initSwitch('swPush', 'push');
+
+  function toggleSwitch(key) {
+    var cur = getSetting(key, true);
+    setSetting(key, !cur);
+    document.getElementById(key === 'notice' ? 'swNotice' : 'swPush').classList.toggle('on', !cur);
+    showToast(!cur ? '已开启' : '已关闭');
+  }
+
+  // 缓存大小估算
+  function calcCache() {
+    var total = 0;
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      var v = localStorage.getItem(k) || '';
+      total += k.length + v.length;
+    }
+    var kb = Math.round(total / 1024);
+    document.getElementById('cacheSize').textContent = kb > 0 ? kb + ' KB' : '0 KB';
+  }
+  calcCache();
+
+  function clearCache() {
+    showConfirm('确定清除缓存吗？', function() {
+      localStorage.clear();
+      calcCache();
+      showToast('缓存已清除');
+    });
+  }
+
+  function openPage(id) {
+    window.location.href = id + '.html';
+  }
+
+  // 退出登录
+  function confirmLogout() {
+    showConfirm('确定退出登录吗？', function() {
+      localStorage.removeItem('yuyoo_user');
+      showToast('已退出登录');
+      setTimeout(function(){ window.location.href = '426384.html'; }, 1200);
+    });
+  }
+
+  // 通用确认弹窗
+  var confirmCallback = null;
+  function showConfirm(text, cb) {
+    document.getElementById('modalText').textContent = text;
+    confirmCallback = cb;
+    document.getElementById('modalMask').style.display = 'flex';
+  }
+  function closeModal() {
+    document.getElementById('modalMask').style.display = 'none';
+    confirmCallback = null;
+  }
+  function doLogout() {
+    document.getElementById('modalMask').style.display = 'none';
+    if (confirmCallback) { confirmCallback(); confirmCallback = null; }
+  }
+  document.getElementById('modalMask').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+</script>
+</body>
+</html>
