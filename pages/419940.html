@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -6,23 +6,28 @@
 <title>产品分类</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { font-family:"Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; display:flex; }
+  body { font-family:"PingFang SC","Microsoft YaHei",-apple-system,sans-serif; background:#f5f6f8; min-height:100vh; display:flex; max-width:480px; margin:0 auto; }
   /* 左侧分类导航 */
-  .side { width:96px; flex-shrink:0; background:#f0f1f3; min-height:100vh; overflow-y:auto; }
-  .cat-item { padding:17px 8px; font-size:14px; color:#555; text-align:center; cursor:pointer; border-left:3px solid transparent; transition:all .15s; line-height:1.4; }
+  .side { width:96px; flex-shrink:0; background:#f7f8fa; height:100vh; height:100dvh; overflow-y:auto; border-right:1px solid #edeff2; }
+  .cat-item { padding:21px 6px; font-size:14px; color:#4a525c; text-align:center; cursor:pointer; border-left:3px solid transparent; transition:all .2s; line-height:1.4; position:relative; }
   .cat-item.active { background:#fff; color:#ff7a18; font-weight:600; border-left-color:#ff7a18; }
-  .cat-item:not(.active):active { background:#e8eaed; }
+  .cat-item.active::after { content:''; position:absolute; right:10px; top:50%; width:4px; height:4px; border-radius:50%; background:#ff7a18; transform:translateY(-50%); }
+  .cat-item:not(.active):active { background:#eef0f3; color:#1a1a1a; }
   /* 右侧产品区 */
-  .main { flex:1; padding:14px; overflow-y:auto; max-height:100vh; }
-  .main-title { font-size:15px; font-weight:600; color:#1a1a1a; margin-bottom:12px; }
+  .main { flex:1; padding:14px; overflow-y:auto; height:100vh; height:100dvh; scroll-behavior:smooth; }
+  .main::-webkit-scrollbar { width:0; }
+  .main-title { position:sticky; top:0; z-index:5; margin:-14px -14px 12px; padding:14px 16px 12px; font-size:15px; font-weight:600; color:#1a1a1a; background:rgba(245,246,248,0.92); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-bottom:1px solid rgba(0,0,0,0.04); }
   .prod-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .prod-card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); cursor:pointer; transition:transform .1s; }
-  .prod-card:active { transform:scale(0.97); }
-  .prod-img { width:100%; height:110px; object-fit:cover; display:block; }
-  .prod-body { padding:10px; }
-  .prod-name { font-size:14px; font-weight:600; color:#1a1a1a; }
-  .prod-slogan { font-size:11px; color:#ff7a18; margin-top:4px; }
-  .empty { grid-column:1/-1; text-align:center; padding:60px 0; color:#b0b8c4; font-size:13px; }
+  .prod-card { background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); cursor:pointer; transition:transform .25s, box-shadow .25s; animation:fadeUp .3s ease; }
+  .prod-card:active { transform:scale(0.97); box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+  .prod-img { width:100%; height:110px; object-fit:cover; display:block; background:#eef0f3; }
+  .prod-body { padding:10px 12px 12px; }
+  .prod-name { font-size:14px; font-weight:600; color:#1a1a1a; line-height:1.4; }
+  .prod-slogan { font-size:11px; color:#ff7a18; margin-top:5px; }
+  .empty { grid-column:1/-1; text-align:center; padding:70px 0; color:#8a93a0; font-size:13px; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  @media (max-width:360px) { .side { width:84px; } .prod-grid { gap:10px; } .prod-img { height:96px; } }
+  @media (min-width:481px) { body { box-shadow:0 0 40px rgba(0,0,0,0.06); } }
 </style>
 <link rel="stylesheet" href="../assets/css/app.css">
 <script src="../assets/js/ui.js"></script>
@@ -75,7 +80,7 @@
     var html = '';
     list.forEach(function(p) {
       html += '<div class="prod-card" onclick="openDetail(\'' + p.id + '\')">' +
-        '<img class="prod-img" src="' + p.image + '" onerror="this.onerror=null;this.src=yuyooProductImage(p.name)">' +
+        '<img class="prod-img" loading="lazy" src="' + p.image + '" onerror="this.onerror=null;this.src=yuyooProductImage(p.name)">' +
         '<div class="prod-body">' +
           '<div class="prod-name">' + p.name + '</div>' +
           '<div class="prod-slogan">' + p.slogan + '</div>' +
