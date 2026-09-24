@@ -152,3 +152,35 @@ body { max-width: 480px; margin: 0 auto; }
 .theme-toggle.dragging:active { transform: scale(1.18); }
 /* 深色模式下的夜间按钮视觉优化 */
 [data-theme="dark"] .theme-toggle { box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
+
+/* 底部导航栏（tabBar：首页/产品中心/公司介绍/我的） */
+.tabbar {
+  position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
+  width: 100%; max-width: 480px; height: calc(58px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex; z-index: 1000;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  transition: background var(--tr), border-color var(--tr);
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--text-3); text-decoration: none; position: relative;
+  transition: color var(--tr), transform var(--tr);
+}
+.tab-item:active { transform: scale(0.94); }
+.tab-icon { font-size: 20px; line-height: 1; transition: transform var(--tr); }
+.tab-label { font-size: 11px; margin-top: 3px; line-height: 1.2; }
+.tab-item.active { color: var(--brand); font-weight: 600; }
+.tab-item.active::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 3px; border-radius: 0 0 3px 3px; background: var(--brand-grad);
+}
+.tab-item.active .tab-icon { transform: translateY(-1px) scale(1.08); }
+/* tab 页内容底部留白，避免被导航栏遮挡 */
+body.has-tabbar { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
+/* 固定高度滚动区（如产品分类页 .main）扣除导航栏高度，防止底部内容被遮挡 */
+body.has-tabbar .main { height: calc(100dvh - 58px - env(safe-area-inset-bottom)); }
+/* tab 页夜间模式按钮上移，避免被导航栏遮挡 */
+body.has-tabbar .theme-toggle { bottom: calc(env(safe-area-inset-bottom) + 72px); }
