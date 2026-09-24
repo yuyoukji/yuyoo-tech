@@ -81,6 +81,37 @@
   .adv-item .body { margin-left:12px; flex:1; min-width:0; }
   .adv-item .t { font-size:14px; font-weight:600; color:#fff; }
   .adv-item .d { font-size:11px; color:rgba(255,255,255,0.78); margin-top:2px; line-height:1.5; }
+  /* 公司介绍视频入口按钮（播放能力由页面底部 COMPANY_VIDEO 接口驱动） */
+  .video-entry { display:flex; align-items:center; width:100%; margin-top:16px; padding:14px 16px;
+    border:none; border-radius:12px; background:linear-gradient(135deg,#ff7a18,#ff9436); color:#fff;
+    font-family:inherit; text-align:left; cursor:pointer; box-shadow:0 4px 14px rgba(255,122,24,0.32);
+    transition:transform .25s cubic-bezier(0.4,0,0.2,1), box-shadow .25s cubic-bezier(0.4,0,0.2,1), opacity .25s ease; }
+  .video-entry:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(255,122,24,0.42); }
+  .video-entry:active { transform:scale(0.98); opacity:.92; }
+  .video-entry .ve-play { width:34px; height:34px; flex-shrink:0; margin-right:12px; border-radius:50%;
+    background:rgba(255,255,255,0.22); display:flex; align-items:center; justify-content:center; font-size:13px; text-indent:2px; }
+  .video-entry .ve-body { flex:1; min-width:0; }
+  .video-entry .ve-title { display:block; font-size:15px; font-weight:600; line-height:1.3; }
+  .video-entry .ve-sub { display:block; font-size:11px; font-weight:400; opacity:.85; margin-top:3px; }
+  .video-entry .ve-arrow { flex-shrink:0; margin-left:8px; font-size:18px; opacity:.9; }
+  /* 播放弹层 */
+  .video-modal { position:fixed; inset:0; z-index:10000; display:none; align-items:center; justify-content:center;
+    padding:20px; background:rgba(8,12,20,0.86); }
+  .video-modal.show { display:flex; animation:vmIn .28s ease both; }
+  @keyframes vmIn { from { opacity:0; } to { opacity:1; } }
+  .video-box { width:100%; max-width:440px; }
+  .video-head { display:flex; align-items:center; margin-bottom:10px; color:#fff; }
+  .video-head .vh-title { flex:1; min-width:0; font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .video-close { width:32px; height:32px; flex-shrink:0; border:none; border-radius:50%; background:rgba(255,255,255,0.16);
+    color:#fff; font-size:15px; cursor:pointer; transition:transform .25s ease, background .25s ease; }
+  .video-close:active { transform:scale(0.92); background:rgba(255,255,255,0.26); }
+  .video-frame { width:100%; background:#000; border-radius:12px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.5); }
+  .video-frame video { display:block; width:100%; max-height:60vh; background:#000; }
+  /* 轻提示（视频资源未接入时的反馈） */
+  .video-toast { position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 84px); transform:translateX(-50%);
+    z-index:10001; max-width:80%; padding:11px 18px; border-radius:22px; background:rgba(24,28,36,0.92); color:#fff;
+    font-size:13px; line-height:1.5; text-align:center; opacity:0; pointer-events:none; transition:opacity .25s ease; }
+  .video-toast.show { opacity:1; }
 </style>
 <link rel="stylesheet" href="../assets/css/app.css">
 <script src="../assets/js/ui.js"></script>
@@ -107,6 +138,15 @@
       <p>誉友科技有限公司是一家专注于软件开发与数字化服务的科技企业，致力于为企业提供高品质的软件定制开发、移动应用、小程序及云服务解决方案。</p>
       <p>公司汇聚了一批经验丰富的技术专家与行业顾问，深耕制造、贸易、零售等多个领域，凭借扎实的技术功底与深入的行业理解，已助力众多企业完成数字化转型，实现降本增效与业务增长。</p>
       <p>我们坚持以客户为中心，以技术为驱动，以质量为生命，持续为客户创造长期价值。</p>
+      <!-- 视频入口：内容区显著位置，接口见页面底部 COMPANY_VIDEO -->
+      <button class="video-entry" id="videoEntry" type="button" aria-label="观看公司介绍视频">
+        <span class="ve-play">▶</span>
+        <span class="ve-body">
+          <span class="ve-title">观看公司介绍视频</span>
+          <span class="ve-sub">用一段短片快速了解誉友科技</span>
+        </span>
+        <span class="ve-arrow">›</span>
+      </button>
     </div>
 
     <!-- 数据统计 -->
@@ -186,5 +226,79 @@
       <div class="contact-phone">199-1703-3375</div>
     </div>
   </div>
+
+  <!-- 公司介绍视频播放弹层（资源接入见页面底部 COMPANY_VIDEO） -->
+  <div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-label="公司介绍视频">
+    <div class="video-box">
+      <div class="video-head">
+        <div class="vh-title" id="videoTitle">誉友科技 · 公司介绍</div>
+        <button class="video-close" id="videoClose" type="button" aria-label="关闭视频">✕</button>
+      </div>
+      <div class="video-frame">
+        <video id="videoPlayer" controls playsinline webkit-playsinline preload="metadata"></video>
+      </div>
+    </div>
+  </div>
+  <div class="video-toast" id="videoToast" role="status" aria-live="polite"></div>
+
+  <script>
+  /* ===== 公司介绍视频 · 资源接入接口 =====
+   * 接入视频时只需填写下面的 src（建议放入 assets/video/ 目录并以相对路径引用，保持本地可用、离线可播）：
+   *   COMPANY_VIDEO.src = '../assets/video/company.mp4';        // 视频文件
+   *   COMPANY_VIDEO.poster = '../assets/img/video-poster.jpg';  // 可选：封面图
+   *   COMPANY_VIDEO.title = '誉友科技 · 公司介绍';              // 可选：弹层标题
+   * 若需接入第三方播放器（如直播 / 云点播），可覆盖 window.onCompanyVideoRequest 自行接管：
+   *   window.onCompanyVideoRequest = function () { ... };
+   */
+  var COMPANY_VIDEO = {
+    src: '',
+    poster: '',
+    title: '誉友科技 · 公司介绍'
+  };
+
+  (function () {
+    var modal = document.getElementById('videoModal');
+    var player = document.getElementById('videoPlayer');
+    var titleEl = document.getElementById('videoTitle');
+    var toast = document.getElementById('videoToast');
+    var toastTimer = null;
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2400);
+    }
+
+    function closeVideo() {
+      modal.classList.remove('show');
+      try { player.pause(); } catch (e) {}
+      player.removeAttribute('src');
+      try { player.load(); } catch (e) {}
+    }
+
+    function openVideo() {
+      // 资源未接入：给出明确反馈；填写 COMPANY_VIDEO.src 后本按钮即自动生效
+      if (!COMPANY_VIDEO.src) {
+        showToast('公司介绍视频即将上线，敬请期待');
+        if (typeof window.onCompanyVideoRequest === 'function') window.onCompanyVideoRequest();
+        return;
+      }
+      titleEl.textContent = COMPANY_VIDEO.title || '公司介绍视频';
+      if (COMPANY_VIDEO.poster) player.poster = COMPANY_VIDEO.poster;
+      player.src = COMPANY_VIDEO.src;
+      modal.classList.add('show');
+      var p = player.play();
+      if (p && p.catch) p.catch(function () {});  // 移动端可能需用户再点一次播放键
+    }
+
+    document.getElementById('videoEntry').addEventListener('click', openVideo);
+    document.getElementById('videoClose').addEventListener('click', closeVideo);
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeVideo(); });
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'Escape' || e.keyCode === 27) && modal.classList.contains('show')) closeVideo();
+    });
+  })();
+  </script>
 </body>
 </html>
