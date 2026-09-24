@@ -139,6 +139,13 @@
   var btn = null;
   var resumeBound = false;
 
+  // iOS 17.4+ Safari：把音频会话声明为 playback，手机静音开关拨到静音时也能出声
+  function tuneAudioSession() {
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = 'playback';
+    } catch (e) {}
+  }
+
   function ensureCtx() {
     if (ac) return;
     var Ctx = window.AudioContext || window.webkitAudioContext;
@@ -237,19 +244,26 @@
       audioEl.setAttribute('webkit-playsinline', '');
       audioEl.style.display = 'none';
       document.body.appendChild(audioEl);
-      var settled = false;
-      audioEl.addEventListener('loadedmetadata', function() {
+      var settled = false, timer = null;
+      var done = function(m) {
         if (settled) return;
         settled = true;
+        if (timer) clearTimeout(timer);
+        cb(m);
+      };
+      // iOS 低电量模式 / 弱网下 preload 会被忽略、loadedmetadata 迟迟不来。
+      // 不能无限等待，否则按钮会一直误显示"播放中"而实际没有声音。
+      timer = setTimeout(function() { done('audio'); }, 2500);
+      audioEl.addEventListener('loadedmetadata', function() {
+        // 即便已超时判定为 audio，元数据到达后仍要补上断点与进度记录
         applyResumePos();
-        atSaver = setInterval(saveAt, 1000);
-        cb('audio');
+        if (!atSaver) atSaver = setInterval(saveAt, 1000);
+        done('audio');
       });
       audioEl.addEventListener('error', function() {
         if (settled) return;
-        settled = true;
         audioEl = null;
-        cb('synth');
+        done('synth');
       });
       audioEl.src = AUDIO_FILE;
       audioEl.load();
@@ -259,26 +273,40 @@
     }
   }
 
-  function startAudio() {
-    if (!audioEl) return false;
-    unbindResume();
+  // 播放本地音乐：区分"被自动播放策略拦截"与"文件不可用"，后者回落到程序化音乐保证不哑
+  function playAudio() {
+    if (!audioEl) return;
     var p = audioEl.play();
-    if (p && p.then) {
-      p.then(function() {
-        blocked = false;
-        playing = true;
-        render();
-      }).catch(function() {
-        // 被浏览器自动播放策略拦住（移动端极常见）：等用户第一次交互再出声
+    if (!p || !p.then) {
+      blocked = false;
+      playing = true;
+      render();
+      return;
+    }
+    p.then(function() {
+      blocked = false;
+      playing = true;
+      render();
+    }).catch(function(err) {
+      if (err && err.name === 'NotAllowedError') {
+        // 被浏览器自动播放策略拦住（iOS Safari / 微信极常见）：等用户交互再出声
         blocked = true;
         playing = false;
         render();
         bindResume();
-      });
-    } else {
-      blocked = false;
-      playing = true;
-    }
+      } else {
+        // 文件真的不可用（格式不支持 / 网络失败）：切到程序化音乐，避免整页无声
+        audioEl = null;
+        mode = 'synth';
+        startSynth();
+      }
+    });
+  }
+
+  function startAudio() {
+    if (!audioEl) return false;
+    unbindResume();
+    playAudio();
     return true;
   }
   function stopAudio() {
@@ -288,6 +316,7 @@
 
   // 对外统一入口：按实际可用的音乐来源分发
   function start() {
+    tuneAudioSession();
     if (mode === 'audio') return startAudio();
     if (mode === 'synth') return startSynth();
     return false;
@@ -350,13 +379,7 @@
     unbindResume();
     if (!want) return;
     if (mode === 'audio') {
-      if (audioEl) {
-        var p = audioEl.play();
-        if (p && p.then) {
-          p.then(function() { blocked = false; playing = true; render(); })
-            .catch(function() { bindResume(); });
-        }
-      }
+      playAudio();
       return;
     }
     if (!ac) return;
@@ -387,11 +410,11 @@
     if (!want) {
       btn.textContent = '🔇';
       btn.setAttribute('title', '背景音乐：已关闭（点击播放）');
-    } else if (blocked) {
-      // 已开启但浏览器还没允许出声：明确提示用户点一下
+    } else if (blocked || !mode) {
+      // 还没出声（被浏览器拦住，或音源尚未就绪）：提示用户点一下，绝不误显示"播放中"
       btn.textContent = '🔈';
       btn.classList.add('blocked');
-      btn.setAttribute('title', '背景音乐：点一下页面即可播放');
+      btn.setAttribute('title', '背景音乐：点一下即可播放');
     } else {
       btn.textContent = '🎵';
       btn.classList.add('playing');
@@ -415,18 +438,22 @@
     });
 
     btn.addEventListener('click', function() {
-      // 已开启但被浏览器拦住（还没出声）时，点击视为"立即播放"，而不是把它关掉
-      if (want && blocked) {
-        if (mode === 'audio' && audioEl) {
-          var p = audioEl.play();
-          if (p && p.then) {
-            p.then(function() { blocked = false; playing = true; render(); })
-              .catch(function() { render(); });
-          }
-        } else if (ac && ac.state === 'suspended' && ac.resume) {
-          try { ac.resume(); } catch (e) {}
+      // 已开启但还没出声（被浏览器拦住 / 音源尚未就绪）时，点击视为"立即播放"，而不是把它关掉
+      if (want && (blocked || !mode)) {
+        tuneAudioSession();
+        if (mode === 'audio') {
+          playAudio();
+        } else if (mode === 'synth') {
+          if (ac && ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
           blocked = false;
           render();
+        } else if (audioEl) {
+          // 音源还在探测中：先按本地音乐试播（play() 会同时触发加载）
+          mode = 'audio';
+          playAudio();
+        } else {
+          mode = 'synth';
+          startSynth();
         }
         return;
       }
