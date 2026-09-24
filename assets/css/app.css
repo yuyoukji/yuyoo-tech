@@ -184,3 +184,26 @@ body.has-tabbar { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
 body.has-tabbar .main { height: calc(100dvh - 58px - env(safe-area-inset-bottom)); }
 /* tab 页夜间模式按钮上移，避免被导航栏遮挡 */
 body.has-tabbar .theme-toggle { bottom: calc(env(safe-area-inset-bottom) + 72px); }
+
+/* 背景音乐开关按钮（位于夜间模式按钮上方，风格保持一致） */
+.music-toggle {
+  position: fixed; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 78px);
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--surface); color: var(--text); font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg); z-index: 9999;
+  border: 1px solid var(--border);
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+  transition: transform var(--tr), background var(--tr), box-shadow var(--tr), border-color var(--tr);
+}
+.music-toggle:active { transform: scale(0.9); }
+.music-toggle.playing {
+  background: var(--brand-grad); color: #fff; border-color: transparent;
+  animation: musicPulse 2.2s ease-in-out infinite;
+}
+[data-theme="dark"] .music-toggle { box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
+body.has-tabbar .music-toggle { bottom: calc(env(safe-area-inset-bottom) + 130px); }
+@keyframes musicPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,122,24,0.45); }
+  50% { box-shadow: 0 0 0 10px rgba(255,122,24,0); }
+}
