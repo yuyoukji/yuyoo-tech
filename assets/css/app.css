@@ -132,13 +132,23 @@ h1 { font-size: 20px; } h2 { font-size: 18px; } h3 { font-size: 16px; } h4 { fon
 /* 全局最大宽度约束（横屏/平板不拉伸） */
 body { max-width: 480px; margin: 0 auto; }
 
-/* 夜间模式切换按钮 */
+/* 夜间模式切换按钮（可拖拽移动位置） */
 .theme-toggle {
   position: fixed; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 20px);
   width: 46px; height: 46px; border-radius: 50%;
   background: var(--brand-grad); color: #fff; font-size: 20px;
   display: flex; align-items: center; justify-content: center;
   box-shadow: var(--shadow-lg); z-index: 9999; border: none;
-  transition: transform var(--tr), background var(--tr);
+  cursor: grab; touch-action: none; user-select: none;
+  -webkit-user-select: none;
+  transition: transform var(--tr), background var(--tr), box-shadow var(--tr);
 }
 .theme-toggle:active { transform: scale(0.9); }
+.theme-toggle.dragging {
+  cursor: grabbing; transform: scale(1.18);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+  background: var(--brand-dark);
+}
+.theme-toggle.dragging:active { transform: scale(1.18); }
+/* 深色模式下的夜间按钮视觉优化 */
+[data-theme="dark"] .theme-toggle { box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
