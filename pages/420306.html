@@ -31,6 +31,25 @@
   .value-icon { font-size:26px; margin-bottom:10px; }
   .value-name { font-size:14px; font-weight:600; color:#1a1a1a; }
   .value-desc { font-size:12px; color:#8a919c; line-height:1.6; margin-top:6px; }
+  /* 核心价值观 · 视觉优化（仅本板块，背景图取自已指定的5张产品背景图；其余区块背景保持原样） */
+  .values-card { position:relative; overflow:hidden; }
+  .values-card::before { content:''; position:absolute; inset:0; z-index:0; background-image:url('../assets/img/products/cloud.jpg'); background-size:cover; background-position:center; opacity:.16; }
+  .values-card .sec-title, .values-card .value-grid { position:relative; z-index:1; }
+  .value-item { position:relative; overflow:hidden; border-radius:12px; padding:20px 14px; text-align:center; color:#fff; background-color:#1a2b45;
+    background-size:cover; background-position:center; box-shadow:0 2px 10px rgba(0,0,0,0.12);
+    transition:transform .25s ease, box-shadow .25s ease; animation:fadeUp2 .45s ease both; }
+  .value-item::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(8,16,32,0.28) 0%, rgba(8,16,32,0.58) 100%); }
+  .value-item:hover { transform:translateY(-4px); box-shadow:0 6px 18px rgba(0,0,0,0.18); }
+  .value-item:active { transform:scale(0.97); }
+  .value-item .value-icon, .value-item .value-name, .value-item .value-desc { position:relative; z-index:1; }
+  .value-item .value-icon { text-shadow:0 2px 8px rgba(0,0,0,0.5); }
+  .value-item .value-name { color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.65); }
+  .value-item .value-desc { color:rgba(255,255,255,0.88); text-shadow:0 1px 3px rgba(0,0,0,0.55); }
+  .value-item.v-erp { background-image:url('../assets/img/products/dev.jpg'); animation-delay:0s; }
+  .value-item.v-crm { background-image:url('../assets/img/products/software.jpg'); animation-delay:.08s; }
+  .value-item.v-weapp { background-image:url('../assets/img/products/weapp.jpg'); animation-delay:.16s; }
+  .value-item.v-app { background-image:url('../assets/img/products/app.jpg'); animation-delay:.24s; }
+  @keyframes fadeUp2 { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
   .biz-item { display:flex; align-items:flex-start; padding:12px 0; border-bottom:1px dashed #f0f0f0; }
   .biz-item:last-child { border-bottom:none; }
   .biz-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; margin-right:14px; flex-shrink:0; }
@@ -101,13 +120,13 @@
     </div>
 
     <!-- 核心价值观 -->
-    <div class="card">
+    <div class="card values-card">
       <div class="sec-title"><div class="sec-bar"></div><div class="sec-text">核心价值观</div><div class="sec-en">CORE VALUES</div></div>
       <div class="value-grid">
-        <div class="value-item"><div class="value-icon">🎯</div><div class="value-name">客户至上</div><div class="value-desc">深入理解需求，超越客户期望</div></div>
-        <div class="value-item"><div class="value-icon">💡</div><div class="value-name">创新驱动</div><div class="value-desc">拥抱新技术，持续迭代升级</div></div>
-        <div class="value-item"><div class="value-icon">✨</div><div class="value-name">品质为先</div><div class="value-desc">严格质量把控，交付精品工程</div></div>
-        <div class="value-item"><div class="value-icon">🤝</div><div class="value-name">诚信共赢</div><div class="value-desc">诚信经营，与客户共同成长</div></div>
+        <div class="value-item v-erp"><div class="value-icon">🎯</div><div class="value-name">客户至上</div><div class="value-desc">深入理解需求，超越客户期望</div></div>
+        <div class="value-item v-crm"><div class="value-icon">💡</div><div class="value-name">创新驱动</div><div class="value-desc">拥抱新技术，持续迭代升级</div></div>
+        <div class="value-item v-weapp"><div class="value-icon">✨</div><div class="value-name">品质为先</div><div class="value-desc">严格质量把控，交付精品工程</div></div>
+        <div class="value-item v-app"><div class="value-icon">🤝</div><div class="value-name">诚信共赢</div><div class="value-desc">诚信经营，与客户共同成长</div></div>
       </div>
     </div>
 
