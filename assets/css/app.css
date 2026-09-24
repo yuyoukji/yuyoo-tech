@@ -201,6 +201,16 @@ body.has-tabbar .theme-toggle { bottom: calc(env(safe-area-inset-bottom) + 72px)
   background: var(--brand-grad); color: #fff; border-color: transparent;
   animation: musicPulse 2.2s ease-in-out infinite;
 }
+/* 已开启但浏览器还没允许出声（移动端常见）：醒目提示"点一下即可播放" */
+.music-toggle.blocked {
+  background: var(--surface); color: var(--brand);
+  border: 2px solid var(--brand);
+  animation: musicHint 1.6s ease-in-out infinite;
+}
+@keyframes musicHint {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,122,24,0.55); }
+  50% { box-shadow: 0 0 0 9px rgba(255,122,24,0); }
+}
 [data-theme="dark"] .music-toggle { box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
 body.has-tabbar .music-toggle { bottom: calc(env(safe-area-inset-bottom) + 130px); }
 @keyframes musicPulse {

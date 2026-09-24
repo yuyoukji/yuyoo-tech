@@ -134,6 +134,7 @@
   var playing = false;  // 是否已调度播放
   var mode = null;      // 'audio' 本地音乐文件优先 / 'synth' 程序化音乐回落
   var audioEl = null;   // 本地音乐的播放元素
+  var blocked = false;  // 已开启但被浏览器自动播放策略拦住（还没出声）
   var atSaver = null;
   var btn = null;
   var resumeBound = false;
@@ -228,9 +229,14 @@
   // 探测本地音乐文件：存在就用它，否则回落到程序化音乐（保证页面永远不会哑掉）
   function probeAudio(cb) {
     try {
-      audioEl = new Audio();
+      // 用真实插入 DOM 的 <audio> 元素，iOS Safari 对游离 Audio 对象的播放限制更严
+      audioEl = document.createElement('audio');
       audioEl.preload = 'metadata';
       audioEl.loop = true;
+      audioEl.setAttribute('playsinline', '');
+      audioEl.setAttribute('webkit-playsinline', '');
+      audioEl.style.display = 'none';
+      document.body.appendChild(audioEl);
       var settled = false;
       audioEl.addEventListener('loadedmetadata', function() {
         if (settled) return;
@@ -257,8 +263,22 @@
     if (!audioEl) return false;
     unbindResume();
     var p = audioEl.play();
-    if (p && p.catch) p.catch(function() { bindResume(); });
-    playing = true;
+    if (p && p.then) {
+      p.then(function() {
+        blocked = false;
+        playing = true;
+        render();
+      }).catch(function() {
+        // 被浏览器自动播放策略拦住（移动端极常见）：等用户第一次交互再出声
+        blocked = true;
+        playing = false;
+        render();
+        bindResume();
+      });
+    } else {
+      blocked = false;
+      playing = true;
+    }
     return true;
   }
   function stopAudio() {
@@ -300,6 +320,16 @@
     master.gain.linearRampToValueAtTime(0.5, ac.currentTime + 2.5);
     playing = true;
     unbindResume();
+    // 合成音乐同样受自动播放策略限制：状态变化时同步按钮提示
+    if (!ac._bound) {
+      ac._bound = true;
+      ac.addEventListener('statechange', function() {
+        blocked = (ac.state === 'suspended');
+        render();
+      });
+    }
+    blocked = (ac.state === 'suspended');
+    render();
     return true;
   }
 
@@ -314,39 +344,59 @@
   }
 
   // 浏览器自动播放策略：音频被挂起时，等首次用户交互立即恢复出声
-  function onFirstGesture() {
+  function onFirstGesture(e) {
+    // 点音乐按钮时由按钮自身逻辑处理，这里不重复介入
+    if (e && e.target && e.target.closest && e.target.closest('.music-toggle')) return;
     unbindResume();
     if (!want) return;
     if (mode === 'audio') {
       if (audioEl) {
         var p = audioEl.play();
-        if (p && p.catch) p.catch(function() {});
+        if (p && p.then) {
+          p.then(function() { blocked = false; playing = true; render(); })
+            .catch(function() { bindResume(); });
+        }
       }
       return;
     }
     if (!ac) return;
-    if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
+    if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (err) {} }
   }
   function bindResume() {
     if (resumeBound) return;
     resumeBound = true;
     document.addEventListener('pointerdown', onFirstGesture);
-    document.addEventListener('keydown', onFirstGesture);
     document.addEventListener('touchstart', onFirstGesture);
+    document.addEventListener('touchend', onFirstGesture);
+    document.addEventListener('click', onFirstGesture);
+    document.addEventListener('keydown', onFirstGesture);
   }
   function unbindResume() {
     if (!resumeBound) return;
     resumeBound = false;
     document.removeEventListener('pointerdown', onFirstGesture);
-    document.removeEventListener('keydown', onFirstGesture);
     document.removeEventListener('touchstart', onFirstGesture);
+    document.removeEventListener('touchend', onFirstGesture);
+    document.removeEventListener('click', onFirstGesture);
+    document.removeEventListener('keydown', onFirstGesture);
   }
 
   function render() {
     if (!btn) return;
-    btn.textContent = want ? '🎵' : '🔇';
-    btn.classList.toggle('playing', want);
-    btn.setAttribute('title', want ? '背景音乐：播放中（点击关闭）' : '背景音乐：已关闭（点击播放）');
+    btn.classList.remove('playing', 'blocked');
+    if (!want) {
+      btn.textContent = '🔇';
+      btn.setAttribute('title', '背景音乐：已关闭（点击播放）');
+    } else if (blocked) {
+      // 已开启但浏览器还没允许出声：明确提示用户点一下
+      btn.textContent = '🔈';
+      btn.classList.add('blocked');
+      btn.setAttribute('title', '背景音乐：点一下页面即可播放');
+    } else {
+      btn.textContent = '🎵';
+      btn.classList.add('playing');
+      btn.setAttribute('title', '背景音乐：播放中（点击关闭）');
+    }
   }
 
   function save() {
@@ -360,11 +410,26 @@
     document.body.appendChild(btn);
 
     // 点击按钮本身不触发"首次手势恢复"，避免与开关逻辑互相抵消
-    ['pointerdown', 'touchstart'].forEach(function(t) {
+    ['pointerdown', 'touchstart', 'touchend', 'click'].forEach(function(t) {
       btn.addEventListener(t, function(e) { e.stopPropagation(); });
     });
 
     btn.addEventListener('click', function() {
+      // 已开启但被浏览器拦住（还没出声）时，点击视为"立即播放"，而不是把它关掉
+      if (want && blocked) {
+        if (mode === 'audio' && audioEl) {
+          var p = audioEl.play();
+          if (p && p.then) {
+            p.then(function() { blocked = false; playing = true; render(); })
+              .catch(function() { render(); });
+          }
+        } else if (ac && ac.state === 'suspended' && ac.resume) {
+          try { ac.resume(); } catch (e) {}
+          blocked = false;
+          render();
+        }
+        return;
+      }
       want = !want;
       if (want) { start(); } else { stop(); }
       render();
@@ -382,12 +447,8 @@
       mode = m;
       if (!want) return;
       start();
-      // 被浏览器自动播放策略拦截时（无声），等首次交互立即恢复出声
-      if (mode === 'audio') {
-        if (!audioEl || audioEl.paused) bindResume();
-      } else if (ac && ac.state === 'suspended') {
-        bindResume();
-      }
+      // audio 分支的拦截处理在 startAudio 内部完成；这里兜底合成音乐被挂起的情况
+      if (mode === 'synth' && ac && ac.state === 'suspended') bindResume();
     });
   });
 })();
