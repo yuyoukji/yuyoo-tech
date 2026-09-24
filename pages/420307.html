@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -46,6 +46,13 @@
 <script>
   function getKw() { return new URLSearchParams(location.search).get('kw') || ''; }
 
+  // HTML 转义，防止 URL 参数注入 XSS
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function search(kw) {
     kw = (kw || '').toLowerCase();
     if (!kw) return [];
@@ -64,11 +71,11 @@
     var info = document.getElementById('info');
     var box = document.getElementById('list');
     if (!list.length) {
-      info.innerHTML = '未找到与「<b>' + kw + '</b>」相关的产品';
+      info.innerHTML = '未找到与「<b>' + esc(kw) + '</b>」相关的产品';
       box.innerHTML = '<div class="empty"><div class="icon">📦</div><div class="txt">暂无相关结果，换个关键词试试</div></div>';
       return;
     }
-    info.innerHTML = '共找到 <b>' + list.length + '</b> 个与「<b>' + kw + '</b>」相关的产品';
+    info.innerHTML = '共找到 <b>' + list.length + '</b> 个与「<b>' + esc(kw) + '</b>」相关的产品';
     var html = '';
     list.forEach(function(p) {
       html += '<div class="prod-item" onclick="openDetail(\'' + p.id + '\')">' +

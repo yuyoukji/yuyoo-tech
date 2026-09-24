@@ -68,14 +68,17 @@
     }
     var html = '';
     data.forEach(function(item) {
-      html += '<div class="card">' +
-        '<div class="card-img"><img src="' + (item.image || '') + '"></div>' +
+      var jump = 'openDetail(\'' + item.id + '\')';
+      var del = 'removeFav(\'' + item.id + '\')';
+      // 编辑态：点卡片无跳转，点 ✕ 删除；普通态：点卡片/箭头跳详情
+      html += '<div class="card"' + (editMode ? '' : ' onclick="' + jump + '"') + '>' +
+        '<div class="card-img"><img src="' + (item.image || '') + '" onerror="this.onerror=null;this.src=yuyooProductImage(\'' + (item.name || '产品图片') + '\')"></div>' +
         '<div class="card-body">' +
           '<div class="card-name">' + esc(item.name || '产品') + '</div>' +
           '<div class="card-slogan">' + esc(item.slogan || '') + '</div>' +
           '<div class="card-cat">' + esc(item.category || '产品') + '</div>' +
         '</div>' +
-        '<div class="card-del" onclick="removeFav(\'' + item.id + '\')">' + (editMode ? '✕' : '›') + '</div>' +
+        '<div class="card-del" onclick="event.stopPropagation();' + (editMode ? del : jump) + '">' + (editMode ? '✕' : '›') + '</div>' +
       '</div>';
     });
     box.innerHTML = html;

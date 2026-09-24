@@ -12,7 +12,9 @@
   .nav-back:active { background:rgba(255,255,255,0.15); }
   .nav-title { flex:1; text-align:center; font-size:16px; font-weight:600; color:#fff; }
   .nav-fav { width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; cursor:pointer; }
-  .banner { background:linear-gradient(160deg,#1a7fd4,#3aa0ee); padding:20px 18px 26px; color:#fff; }
+  .banner { background:linear-gradient(160deg,#1a7fd4,#3aa0ee); padding:20px 18px 26px; color:#fff; position:relative; background-size:cover; background-position:center; }
+  .banner::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg, rgba(8,26,54,0.72) 0%, rgba(15,42,80,0.45) 60%, rgba(15,42,80,0.12) 100%); }
+  .banner > * { position:relative; z-index:1; }
   .banner-tag { display:inline-block; font-size:11px; background:rgba(255,255,255,0.2); padding:3px 10px; border-radius:4px; margin-bottom:10px; }
   .banner-name { font-size:22px; font-weight:700; }
   .banner-sub { font-size:13px; opacity:0.85; margin-top:6px; }
@@ -54,27 +56,18 @@
 
   <div class="block">
     <div class="block-title">产品亮点</div>
-    <div class="adv-item"><div class="adv-dot"></div><div class="adv-text">进销存一体化：采购、销售、库存数据实时同步</div></div>
-    <div class="adv-item"><div class="adv-dot"></div><div class="adv-text">财务协同：业务单据自动生成财务凭证，对账高效</div></div>
-    <div class="adv-item"><div class="adv-dot"></div><div class="adv-text">数据报表：多维度经营分析，决策有据可依</div></div>
+    <div id="hlList"></div>
   </div>
 
   <div class="block">
     <div class="block-title">技术栈</div>
-    <div class="spec-row"><div class="spec-label">后端架构</div><div class="spec-value">Spring Boot + MyBatis Plus</div></div>
-    <div class="spec-row"><div class="spec-label">前端框架</div><div class="spec-value" style="color:#333">Vue 3 + Element Plus</div></div>
-    <div class="spec-row"><div class="spec-label">数据库</div><div class="spec-value" style="color:#333">MySQL 8.0 + Redis</div></div>
-    <div class="spec-row"><div class="spec-label">部署方式</div><div class="spec-value" style="color:#333">Docker + Nginx 容器化</div></div>
-    <div class="spec-row"><div class="spec-label">接口规范</div><div class="spec-value" style="color:#333">RESTful API + JWT 鉴权</div></div>
-    <p class="desc" style="margin-top:14px">誉友ERP采用前后端分离架构，支持私有化部署与 SaaS 云端两种模式，内置权限管理、审批流引擎与开放 API，可灵活对接第三方系统。</p>
+    <div id="specList"></div>
+    <p class="desc" id="pDesc"></p>
   </div>
 
   <div class="block">
     <div class="block-title">行业实践</div>
-    <div class="use-row"><div class="use-label">适用行业</div><div class="use-value">制造业、贸易、零售连锁</div></div>
-    <div class="use-row"><div class="use-label">典型案例</div><div class="use-value">某制造企业：库存周转率提升 35%</div></div>
-    <div class="use-row"><div class="use-label">交付方式</div><div class="use-value">源码交付 / SaaS 订阅</div></div>
-    <div class="use-row"><div class="use-label">售后服务</div><div class="use-value">一年免费维护，终身技术支持</div></div>
+    <div id="useList"></div>
   </div>
 
   <div class="bottom-bar">
@@ -84,15 +77,46 @@
 
   <div class="toast" id="toast"></div>
 
+<script src="../shared/data.js"></script>
+<script src="../assets/js/products.js"></script>
 <script>
   var FAV_KEY = 'yuyoo_favs';
+
+  // 从 URL 读取商品 id，联动渲染对应产品详情
+  var id = new URLSearchParams(location.search).get('id') || 'yy-erp';
+  var product = (window.YUYOO_getProductById && YUYOO_getProductById(id)) || YUYOO_PRODUCTS[0];
+  var detail = (window.YUYOO_SHARED && YUYOO_SHARED.getDetail(product.id)) || null;
+  var catMap = {};
+  (window.YUYOO_CATEGORIES || []).forEach(function (c) { catMap[c.id] = c.name; });
+
   var PRODUCT = {
-    id: 'yy-erp',
-    name: '誉友ERP管理系统',
-    slogan: '企业资源 · 一体化管理',
-    category: '软件开发',
-    image: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#e8f0fb" width="200" height="200"/><circle cx="100" cy="80" r="40" fill="#1a7fd4"/><rect x="60" y="120" width="80" height="60" rx="8" fill="#ff7a18"/><text x="100" y="155" font-size="14" fill="#fff" text-anchor="middle">誉友</text></svg>')
+    id: product.id,
+    name: product.name,
+    slogan: product.slogan,
+    category: catMap[product.category] || product.category,
+    image: product.image,
+    desc: product.desc
   };
+
+  // 渲染商品信息
+  var banner = document.querySelector('.banner');
+  document.getElementById('pCat').textContent = PRODUCT.category;
+  document.getElementById('pName').textContent = PRODUCT.name;
+  document.getElementById('pSlogan').textContent = PRODUCT.slogan;
+  banner.style.backgroundImage = 'url("' + PRODUCT.image + '")';
+
+  function rows(list, cls, labelCls) {
+    return (list || []).map(function (r) {
+      return '<div class="' + cls + '"><div class="' + labelCls + '">' + r[0] + '</div><div class="' +
+        (cls === 'spec-row' ? 'spec-value' : 'use-value') + '">' + r[1] + '</div></div>';
+    }).join('');
+  }
+  document.getElementById('hlList').innerHTML = (detail && detail.highlights || [])
+    .map(function (t) { return '<div class="adv-item"><div class="adv-dot"></div><div class="adv-text">' + t + '</div></div>'; })
+    .join('');
+  document.getElementById('specList').innerHTML = rows(detail && detail.specs, 'spec-row', 'spec-label');
+  document.getElementById('pDesc').textContent = (detail && detail.desc) || product.desc;
+  document.getElementById('useList').innerHTML = rows(detail && detail.practice, 'use-row', 'use-label');
 
   function showToast(msg) {
     var t = document.getElementById('toast');
