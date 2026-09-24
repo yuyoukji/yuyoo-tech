@@ -32,6 +32,19 @@
   .prod-slogan { font-size:11px; color:#ff7a18; margin-top:5px; }
   .empty { grid-column:1/-1; text-align:center; padding:70px 0; color:#8a93a0; font-size:13px; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  /* 优势亮点（同步自首页，深色背景图+亮点卡片） */
+  .adv-section { margin:14px 0 0; }
+  .adv-bg { position:relative; border-radius:14px; overflow:hidden; background-image:url('../assets/img/products/advantage.jpg'); background-size:cover; background-position:center; }
+  .adv-bg::before { content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(8,16,32,0.72) 0%, rgba(8,16,32,0.62) 55%, rgba(8,16,32,0.78) 100%); }
+  .adv-inner { position:relative; z-index:1; padding:26px 18px 18px; color:#fff; }
+  .adv-title { font-size:18px; font-weight:700; text-align:center; text-shadow:0 2px 6px rgba(0,0,0,0.5); }
+  .adv-sub { font-size:12px; color:rgba(255,255,255,0.82); text-align:center; margin-top:6px; }
+  .adv-list { display:flex; flex-direction:column; gap:12px; margin-top:18px; }
+  .adv-item { display:flex; align-items:center; background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.16); border-radius:12px; padding:12px 14px; backdrop-filter:blur(4px); }
+  .adv-item .ico { width:36px; height:36px; flex-shrink:0; border-radius:10px; background:linear-gradient(135deg,#ff7a18,#ff9436); display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 2px 8px rgba(255,122,24,0.4); }
+  .adv-item .body { margin-left:12px; flex:1; min-width:0; }
+  .adv-item .t { font-size:14px; font-weight:600; color:#fff; }
+  .adv-item .d { font-size:11px; color:rgba(255,255,255,0.78); margin-top:2px; line-height:1.5; }
   /* 手机端：侧边分类栏改为可开/关的滑出菜单，避免遮挡产品内容 */
   @media (max-width:767px) {
     .menu-btn { display:flex; }
@@ -64,6 +77,21 @@
   <div class="main">
     <div class="main-title"><span class="menu-btn" id="menuBtn">☰</span><span id="mainTitle">全部产品</span></div>
     <div class="prod-grid" id="grid"></div>
+    <!-- 优势亮点 -->
+    <div class="adv-section">
+      <div class="adv-bg">
+        <div class="adv-inner">
+          <div class="adv-title">誉友优势 值得信赖</div>
+          <div class="adv-sub">数字化交付全链路 · 一站式技术服务</div>
+          <div class="adv-list">
+            <div class="adv-item"><div class="ico">💻</div><div class="body"><div class="t">多端定制开发</div><div class="d">PC 网页 / APP / 小程序多端覆盖，一套业务逻辑多端触达</div></div></div>
+            <div class="adv-item"><div class="ico">⚡</div><div class="body"><div class="t">高效交付周期</div><div class="d">标准模板快速上线，定制需求高效排期，按期交付有保障</div></div></div>
+            <div class="adv-item"><div class="ico">🛡️</div><div class="body"><div class="t">数据安全合规</div><div class="d">数据加密存储、等保合规，全流程权限管控保障信息安全</div></div></div>
+            <div class="adv-item"><div class="ico">🤝</div><div class="body"><div class="t">贴心售后服务</div><div class="d">7x24 技术支持，专属客户经理跟进，响应及时省心无忧</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
 <script src="../shared/data.js"></script>

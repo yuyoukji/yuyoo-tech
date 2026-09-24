@@ -17,11 +17,11 @@ var CATEGORIES = [
 ];
 
 var PRODUCTS = [
-  { id:'yy-erp',   name:'誉友ERP管理系统', slogan:'企业资源 一体化管理', category:'dev',   image:'dev.jpg',      imgSize:'1920x1280', imgFormat:'JPEG', desc:'进销存+财务+生产一体化企业管理系统' },
-  { id:'yy-crm',   name:'誉友CRM客户系统', slogan:'客户管理 销售提效',   category:'dev',   image:'software.jpg', imgSize:'1200x795',  imgFormat:'JPEG', desc:'客户跟进、订单管理、数据分析全流程' },
-  { id:'yy-weapp', name:'微信小程序开发', slogan:'轻量触达 即用即走',   category:'weapp', image:'weapp.jpg',    imgSize:'1269x846',  imgFormat:'JPEG', desc:'电商/展示/预约类小程序定制开发' },
-  { id:'yy-app',   name:'移动APP开发',    slogan:'原生体验 跨端兼容',   category:'app',   image:'app.jpg',      imgSize:'640x359',   imgFormat:'JPEG', desc:'iOS/Android 原生与跨端方案' },
-  { id:'yy-cloud', name:'云服务器部署',   slogan:'弹性扩容 稳定可靠',   category:'cloud', image:'cloud.jpg',    imgSize:'870x580',   imgFormat:'JPEG', desc:'上云架构设计+部署+运维托管' }
+  { id:'yy-erp',   name:'誉友ERP管理系统', slogan:'企业资源 一体化管理', category:'dev',   image:'dev.jpg',      imgSize:'1120x640', imgFormat:'JPEG', imgSizeKB:147, bgReady:true, desc:'进销存+财务+生产一体化企业管理系统' },
+  { id:'yy-crm',   name:'誉友CRM客户系统', slogan:'客户管理 销售提效',   category:'dev',   image:'software.jpg', imgSize:'1120x640', imgFormat:'JPEG', imgSizeKB:172, bgReady:true, desc:'客户跟进、订单管理、数据分析全流程' },
+  { id:'yy-weapp', name:'微信小程序开发', slogan:'轻量触达 即用即走',   category:'weapp', image:'weapp.jpg',    imgSize:'1120x640', imgFormat:'JPEG', imgSizeKB:146, bgReady:true, desc:'电商/展示/预约类小程序定制开发' },
+  { id:'yy-app',   name:'移动APP开发',    slogan:'原生体验 跨端兼容',   category:'app',   image:'app.jpg',      imgSize:'1120x640', imgFormat:'JPEG', imgSizeKB:170, bgReady:true, desc:'iOS/Android 原生与跨端方案' },
+  { id:'yy-cloud', name:'云服务器部署',   slogan:'弹性扩容 稳定可靠',   category:'cloud', image:'cloud.jpg',    imgSize:'1120x640', imgFormat:'JPEG', imgSizeKB:120, bgReady:true, desc:'上云架构设计+部署+运维托管' }
 ];
 
 var BANNERS = [
