@@ -17,6 +17,12 @@
   .main { flex:1; padding:14px; overflow-y:auto; height:100vh; height:100dvh; scroll-behavior:smooth; }
   .main::-webkit-scrollbar { width:0; }
   .main-title { position:sticky; top:0; z-index:5; margin:-14px -14px 12px; padding:14px 16px 12px; font-size:15px; font-weight:600; color:#1a1a1a; background:rgba(245,246,248,0.92); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-bottom:1px solid rgba(0,0,0,0.04); }
+  /* 菜单开关按钮（默认隐藏，手机端显示） */
+  .menu-btn { display:none; width:34px; height:34px; border-radius:10px; background:#ff7a18; color:#fff; font-size:17px; font-weight:700; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:transform .25s, opacity .25s; }
+  .menu-btn:active { transform:scale(0.92); }
+  /* 遮罩（默认隐藏，手机端随菜单显示） */
+  .backdrop { display:none; position:fixed; inset:0; z-index:150; background:rgba(0,0,0,0.45); opacity:0; pointer-events:none; transition:opacity .28s ease; }
+  .backdrop.show { opacity:1; pointer-events:auto; }
   .prod-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .prod-card { background:#fff; border-radius:14px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.05); cursor:pointer; transition:transform .25s, box-shadow .25s; animation:fadeUp .3s ease; }
   .prod-card:active { transform:scale(0.97); box-shadow:0 2px 8px rgba(0,0,0,0.08); }
@@ -26,6 +32,25 @@
   .prod-slogan { font-size:11px; color:#ff7a18; margin-top:5px; }
   .empty { grid-column:1/-1; text-align:center; padding:70px 0; color:#8a93a0; font-size:13px; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  /* 手机端：侧边分类栏改为可开/关的滑出菜单，避免遮挡产品内容 */
+  @media (max-width:767px) {
+    .menu-btn { display:flex; }
+    .backdrop { display:block; }
+    .side {
+      position:fixed;
+      top:0;
+      left:0;
+      bottom:0;
+      z-index:200;
+      width:96px;
+      transform:translateX(-100%);
+      transition:transform .28s ease;
+      box-shadow:none;
+    }
+    .side.open { transform:translateX(0); box-shadow:4px 0 20px rgba(0,0,0,0.18); }
+    .main-title { display:flex; align-items:center; gap:10px; padding:12px 14px; }
+    .main-title > span:last-child { flex:1; }
+  }
   @media (max-width:360px) { .side { width:84px; } .prod-grid { gap:10px; } .prod-img { height:96px; } }
   @media (min-width:481px) { body { box-shadow:0 0 40px rgba(0,0,0,0.06); } }
 </style>
@@ -33,9 +58,10 @@
 <script src="../assets/js/ui.js"></script>
 </head>
 <body>
+  <div class="backdrop" id="backdrop"></div>
   <div class="side" id="side"></div>
   <div class="main">
-    <div class="main-title" id="mainTitle">全部产品</div>
+    <div class="main-title"><span class="menu-btn" id="menuBtn">☰</span><span id="mainTitle">全部产品</span></div>
     <div class="prod-grid" id="grid"></div>
   </div>
 
@@ -43,6 +69,20 @@
   <script src="../assets/js/products.js"></script>
 <script>
   var curCat = 'all';
+
+  // 手机端菜单开/关
+  var sideEl = document.getElementById('side');
+  var backdropEl = document.getElementById('backdrop');
+  var menuBtnEl = document.getElementById('menuBtn');
+  function closeMenu() {
+    sideEl.classList.remove('open');
+    backdropEl.classList.remove('show');
+  }
+  menuBtnEl.addEventListener('click', function() {
+    sideEl.classList.toggle('open');
+    backdropEl.classList.toggle('show');
+  });
+  backdropEl.addEventListener('click', closeMenu);
 
   function renderSide() {
     var html = '<div class="cat-item active" data-cat="all">全部</div>';
@@ -57,6 +97,8 @@
       item.classList.add('active');
       curCat = item.getAttribute('data-cat');
       renderMain();
+      // 手机端选择分类后收起菜单
+      if (window.innerWidth <= 767) closeMenu();
     });
   }
 

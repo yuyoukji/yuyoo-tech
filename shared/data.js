@@ -83,3 +83,21 @@ function getDetail(id) { return DETAILS[id] || null; }
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { CATEGORIES, PRODUCTS, BANNERS, DETAILS, setImgPrefix, img, getProducts, getCategories, getBanners, getProductById, getByCategory, getDetail };
 }
+
+// H5 浏览器端全局暴露（assets/js/products.js 依赖 window.YUYOO_SHARED 取数）
+if (typeof window !== 'undefined' && !window.YUYOO_SHARED) {
+  window.YUYOO_SHARED = {
+    CATEGORIES: CATEGORIES,
+    PRODUCTS: PRODUCTS,
+    BANNERS: BANNERS,
+    DETAILS: DETAILS,
+    setImgPrefix: setImgPrefix,
+    img: img,
+    getProducts: getProducts,
+    getCategories: getCategories,
+    getBanners: getBanners,
+    getProductById: getProductById,
+    getByCategory: getByCategory,
+    getDetail: getDetail
+  };
+}
