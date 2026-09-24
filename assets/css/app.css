@@ -39,21 +39,6 @@
   --tr: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 深色模式 */
-[data-theme="dark"] {
-  --bg: #121418;
-  --surface: #1c1f24;
-  --surface-2: #23272e;
-  --text: #e8eaed;
-  --text-2: #b0b8c4;
-  --text-3: #7a828e;
-  --border: #2a2e35;
-  --divider: #2a2e35;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 14px rgba(0,0,0,0.35);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.45);
-}
-
 /* 基础重置与统一 */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { -webkit-text-size-adjust: 100%; }
@@ -132,27 +117,6 @@ h1 { font-size: 20px; } h2 { font-size: 18px; } h3 { font-size: 16px; } h4 { fon
 /* 全局最大宽度约束（横屏/平板不拉伸） */
 body { max-width: 480px; margin: 0 auto; }
 
-/* 夜间模式切换按钮（可拖拽移动位置） */
-.theme-toggle {
-  position: fixed; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 20px);
-  width: 46px; height: 46px; border-radius: 50%;
-  background: var(--brand-grad); color: #fff; font-size: 20px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--shadow-lg); z-index: 9999; border: none;
-  cursor: grab; touch-action: none; user-select: none;
-  -webkit-user-select: none;
-  transition: transform var(--tr), background var(--tr), box-shadow var(--tr);
-}
-.theme-toggle:active { transform: scale(0.9); }
-.theme-toggle.dragging {
-  cursor: grabbing; transform: scale(1.18);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.28);
-  background: var(--brand-dark);
-}
-.theme-toggle.dragging:active { transform: scale(1.18); }
-/* 深色模式下的夜间按钮视觉优化 */
-[data-theme="dark"] .theme-toggle { box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
-
 /* 底部导航栏（tabBar：首页/产品中心/公司介绍/我的） */
 .tabbar {
   position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
@@ -182,38 +146,3 @@ body { max-width: 480px; margin: 0 auto; }
 body.has-tabbar { padding-bottom: calc(58px + env(safe-area-inset-bottom)); }
 /* 固定高度滚动区（如产品分类页 .main）扣除导航栏高度，防止底部内容被遮挡 */
 body.has-tabbar .main { height: calc(100dvh - 58px - env(safe-area-inset-bottom)); }
-/* tab 页夜间模式按钮上移，避免被导航栏遮挡 */
-body.has-tabbar .theme-toggle { bottom: calc(env(safe-area-inset-bottom) + 72px); }
-
-/* 背景音乐开关按钮（位于夜间模式按钮上方，风格保持一致） */
-.music-toggle {
-  position: fixed; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 78px);
-  width: 46px; height: 46px; border-radius: 50%;
-  background: var(--surface); color: var(--text); font-size: 18px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--shadow-lg); z-index: 9999;
-  border: 1px solid var(--border);
-  cursor: pointer; user-select: none; -webkit-user-select: none;
-  transition: transform var(--tr), background var(--tr), box-shadow var(--tr), border-color var(--tr);
-}
-.music-toggle:active { transform: scale(0.9); }
-.music-toggle.playing {
-  background: var(--brand-grad); color: #fff; border-color: transparent;
-  animation: musicPulse 2.2s ease-in-out infinite;
-}
-/* 已开启但浏览器还没允许出声（移动端常见）：醒目提示"点一下即可播放" */
-.music-toggle.blocked {
-  background: var(--surface); color: var(--brand);
-  border: 2px solid var(--brand);
-  animation: musicHint 1.6s ease-in-out infinite;
-}
-@keyframes musicHint {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,122,24,0.55); }
-  50% { box-shadow: 0 0 0 9px rgba(255,122,24,0); }
-}
-[data-theme="dark"] .music-toggle { box-shadow: 0 4px 18px rgba(0,0,0,0.55); }
-body.has-tabbar .music-toggle { bottom: calc(env(safe-area-inset-bottom) + 130px); }
-@keyframes musicPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,122,24,0.45); }
-  50% { box-shadow: 0 0 0 10px rgba(255,122,24,0); }
-}
