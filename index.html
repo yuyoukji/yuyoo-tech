@@ -2,6 +2,10 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <!-- 根链接直达手机首页；带 #preview 后缀时保留桌面预览工具。置于 head 首部，避免先加载本页资源再跳转造成多余请求被中止 -->
+    <script>
+        if (!location.hash) location.replace('pages/418843.html');
+    </script>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>誉友科技有限公司 - 产品展示</title>
@@ -350,11 +354,6 @@
     </div>
 
     <script>
-        // 根链接直达手机首页（产品首页）；带 #preview 后缀时保留桌面预览工具
-        if (!location.hash) {
-            location.replace('pages/418843.html');
-        }
-
         // 展开/收起分组
         function toggleGroup(el) {
             el.parentElement.classList.toggle('collapsed');
