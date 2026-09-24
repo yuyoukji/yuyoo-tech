@@ -135,6 +135,7 @@
   var mode = null;      // 'audio' 本地音乐文件优先 / 'synth' 程序化音乐回落
   var audioEl = null;   // 本地音乐的播放元素
   var blocked = false;  // 已开启但被浏览器自动播放策略拦住（还没出声）
+  var lastAttempt = 0;  // 最近一次播放尝试的时间，避免触摸触发的播放被随后的 click 又拨回关闭
   var atSaver = null;
   var btn = null;
   var resumeBound = false;
@@ -320,6 +321,31 @@
     weixinUnlock(doPlay);
   }
 
+  // 用户主动触发（按钮的触摸/抬起/点击）：立刻尝试出声。
+  // 必须在 touch 事件里直接调用，微信与 iOS 才认这是"用户手势"。
+  // 返回 true 表示本次交互已用于"开始播放"，按钮就不该再把它当作开关拨回去。
+  function attemptPlay() {
+    if (!want) return false;
+    if (!blocked && mode) return false;  // 正常播放中：交给点击逻辑当开关用
+    lastAttempt = Date.now();
+    tuneAudioSession();
+    if (mode === 'audio') {
+      playAudio();
+    } else if (mode === 'synth') {
+      if (ac && ac.state === 'suspended' && ac.resume) { weixinUnlock(function() { try { ac.resume(); } catch (e) {} }); }
+      blocked = false;
+      render();
+    } else if (audioEl) {
+      // 音源还在探测中：先按本地音乐试播（play() 会同时触发加载）
+      mode = 'audio';
+      playAudio();
+    } else {
+      mode = 'synth';
+      startSynth();
+    }
+    return true;
+  }
+
   function startAudio() {
     if (!audioEl) return false;
     unbindResume();
@@ -394,7 +420,7 @@
 
   // 浏览器自动播放策略：音频被挂起时，等首次用户交互立即恢复出声
   function onFirstGesture(e) {
-    // 点音乐按钮时由按钮自身逻辑处理，这里不重复介入
+    // 按钮上的播放/开关由按钮自身逻辑处理，这里不重复介入
     if (e && e.target && e.target.closest && e.target.closest('.music-toggle')) return;
     unbindResume();
     if (!want) return;
@@ -459,31 +485,20 @@
     btn.setAttribute('aria-label', '背景音乐开关');
     document.body.appendChild(btn);
 
-    // 点击按钮本身不触发"首次手势恢复"，避免与开关逻辑互相抵消
+    // 按钮自身负责"立即出声"：必须在 touch / pointerup 阶段直接发起播放，
+    // 微信与 iOS 才认可这是用户手势；click 停止冒泡，避免文档级手势逻辑重复介入
     ['pointerdown', 'touchstart', 'touchend', 'click'].forEach(function(t) {
       btn.addEventListener(t, function(e) { e.stopPropagation(); });
     });
+    ['pointerup', 'touchend'].forEach(function(t) {
+      btn.addEventListener(t, attemptPlay);
+    });
 
     btn.addEventListener('click', function() {
-      // 已开启但还没出声（被浏览器拦住 / 音源尚未就绪）时，点击视为"立即播放"，而不是把它关掉
-      if (want && (blocked || !mode)) {
-        tuneAudioSession();
-        if (mode === 'audio') {
-          playAudio();
-        } else if (mode === 'synth') {
-          if (ac && ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
-          blocked = false;
-          render();
-        } else if (audioEl) {
-          // 音源还在探测中：先按本地音乐试播（play() 会同时触发加载）
-          mode = 'audio';
-          playAudio();
-        } else {
-          mode = 'synth';
-          startSynth();
-        }
-        return;
-      }
+      // 还没出声时，这次点击已用于"开始播放"，不能再把它当作开关关掉
+      if (attemptPlay()) return;
+      // 触摸阶段刚发起过播放尝试（微信/iOS 的放行路径），这次 click 不应再把开关拨回去
+      if (Date.now() - lastAttempt < 900) return;
       want = !want;
       if (want) { start(); } else { stop(); }
       render();
