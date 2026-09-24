@@ -273,8 +273,19 @@
     }
   }
 
-  // 播放本地音乐：区分"被自动播放策略拦截"与"文件不可用"，后者回落到程序化音乐保证不哑
-  function playAudio() {
+  // 微信内置浏览器（iOS 为 WKWebView 壳）对自动播放的限制比 Safari 更严：
+  // 需要借 WeixinJSBridge 的 getNetworkType 调用"解锁"后，播放才可能出声
+  var isWeixin = /micromessenger/i.test(navigator.userAgent);
+  function weixinUnlock(go) {
+    if (!isWeixin || !window.WeixinJSBridge || !window.WeixinJSBridge.invoke) { go(); return; }
+    var called = false;
+    var once = function() { if (called) return; called = true; go(); };
+    try { window.WeixinJSBridge.invoke('getNetworkType', {}, once); } catch (e) {}
+    setTimeout(once, 400);
+  }
+
+  // 真正的播放动作
+  function doPlay() {
     if (!audioEl) return;
     var p = audioEl.play();
     if (!p || !p.then) {
@@ -301,6 +312,12 @@
         startSynth();
       }
     });
+  }
+
+  // 播放本地音乐：微信先解锁，再区分"被自动播放策略拦截"与"文件不可用"
+  function playAudio() {
+    if (!audioEl) return;
+    weixinUnlock(doPlay);
   }
 
   function startAudio() {
@@ -330,7 +347,10 @@
   function startSynth() {
     ensureCtx();
     if (!ac) return false;
-    if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
+    // 微信 / iOS 下 AudioContext 需要"解锁"后才会真正出声
+    if (ac.state === 'suspended' && ac.resume) {
+      weixinUnlock(function() { try { ac.resume(); } catch (e) {} });
+    }
 
     // 续接上次的和弦进度（切页 / 刷新后接着放，不从头重来）
     var st = readProgress();
@@ -425,6 +445,13 @@
   function save() {
     try { localStorage.setItem(KEY, want ? 'on' : 'off'); } catch (e) {}
   }
+
+  // 微信：JSBridge 就绪本身就是一个可靠的"可播放"时机，
+  // 很多安卓/iOS 微信必须等到这个时机之后播放才会出声
+  document.addEventListener('WeixinJSBridgeReady', function() {
+    if (!btn) return;
+    if (want && (blocked || !mode)) start();
+  }, false);
 
   document.addEventListener('DOMContentLoaded', function() {
     btn = document.createElement('button');
