@@ -21,3 +21,15 @@
   window.YUYOO_getProductById = shared.getProductById;
   window.YUYOO_getByCategory = shared.getByCategory;
 })();
+
+// 产品图片加载失败兜底：返回品牌 SVG 占位图（多个页面 onerror 均引用本函数）
+window.yuyooProductImage = function (name) {
+  var safe = String(name || '产品图片').replace(/[<>&"]/g, '');
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360">' +
+    '<rect width="640" height="360" fill="#f0f1f3"/>' +
+    '<rect width="640" height="5" fill="#ff7a18"/>' +
+    '<text x="320" y="168" font-family="PingFang SC,Microsoft YaHei,sans-serif" font-size="30" text-anchor="middle">💻</text>' +
+    '<text x="320" y="208" font-family="PingFang SC,Microsoft YaHei,sans-serif" font-size="16" fill="#8a93a0" text-anchor="middle">' + safe + '</text>' +
+    '</svg>';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+};
