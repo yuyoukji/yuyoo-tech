@@ -120,11 +120,15 @@
     [196.00, 246.94, 293.66, 329.63]
   ];
 
+  var PROG_KEY = 'yuyoo_music_progress';
+
   var ac = null, master = null, filter = null;
   var voices = [];
   var chordTimer = null;
-  var playing = false;
+  var want = false;     // 用户意愿：是否要音乐（持久化，只能由用户自己决定）
+  var playing = false;  // 是否已调度播放
   var btn = null;
+  var resumeBound = false;
 
   function ensureCtx() {
     if (ac) return;
@@ -181,26 +185,51 @@
     voices = [];
   }
 
+  // 记录 / 读取和弦进度，保证切换页面后音乐听起来是连续的（同一会话内）
+  function readProgress() {
+    try { return JSON.parse(sessionStorage.getItem(PROG_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function writeProgress(n) {
+    try { sessionStorage.setItem(PROG_KEY, JSON.stringify({ n: n, t: Date.now() })); } catch (e) {}
+  }
+
+  function scheduleNext(idx, delay) {
+    chordTimer = setTimeout(function() {
+      releaseVoices(3000);
+      playChord(idx + 1, 3.5);
+      writeProgress(idx + 1);
+      scheduleNext(idx + 1, CHORD_MS);
+    }, delay);
+  }
+
   function start() {
     ensureCtx();
     if (!ac) return false;
-    if (ac.state === 'suspended' && ac.resume) ac.resume();
-    var n = 0;
-    playChord(0, 3);
+    if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
+
+    // 续接上次的和弦进度（切页 / 刷新后接着放，不从头重来）
+    var st = readProgress();
+    var idx = 0, wait = CHORD_MS;
+    if (st && typeof st.n === 'number' && typeof st.t === 'number') {
+      var elapsed = Math.max(0, Date.now() - st.t);
+      idx = st.n + Math.floor(elapsed / CHORD_MS);
+      wait = CHORD_MS - (elapsed % CHORD_MS);
+    }
+    playChord(idx, 3);
+    writeProgress(idx);
+    scheduleNext(idx, wait);
+
     master.gain.cancelScheduledValues(ac.currentTime);
     master.gain.setValueAtTime(master.gain.value, ac.currentTime);
     master.gain.linearRampToValueAtTime(0.5, ac.currentTime + 2.5);
-    chordTimer = setInterval(function() {
-      releaseVoices(3000);
-      playChord(++n, 3.5);
-    }, CHORD_MS);
     playing = true;
+    unbindResume();
     return true;
   }
 
   function stop() {
     playing = false;
-    if (chordTimer) { clearInterval(chordTimer); chordTimer = null; }
+    if (chordTimer) { clearTimeout(chordTimer); chordTimer = null; }
     if (!ac) return;
     master.gain.cancelScheduledValues(ac.currentTime);
     master.gain.setValueAtTime(master.gain.value, ac.currentTime);
@@ -208,15 +237,36 @@
     setTimeout(function() { releaseVoices(400); }, 1200);
   }
 
+  // 浏览器自动播放策略：音频被挂起时，等首次用户交互立即恢复出声
+  function onFirstGesture() {
+    unbindResume();
+    if (!want || !ac) return;
+    if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
+  }
+  function bindResume() {
+    if (resumeBound) return;
+    resumeBound = true;
+    document.addEventListener('pointerdown', onFirstGesture);
+    document.addEventListener('keydown', onFirstGesture);
+    document.addEventListener('touchstart', onFirstGesture);
+  }
+  function unbindResume() {
+    if (!resumeBound) return;
+    resumeBound = false;
+    document.removeEventListener('pointerdown', onFirstGesture);
+    document.removeEventListener('keydown', onFirstGesture);
+    document.removeEventListener('touchstart', onFirstGesture);
+  }
+
   function render() {
     if (!btn) return;
-    btn.textContent = playing ? '🎵' : '🔇';
-    btn.classList.toggle('playing', playing);
-    btn.setAttribute('title', playing ? '背景音乐：播放中（点击关闭）' : '背景音乐：已关闭（点击播放）');
+    btn.textContent = want ? '🎵' : '🔇';
+    btn.classList.toggle('playing', want);
+    btn.setAttribute('title', want ? '背景音乐：播放中（点击关闭）' : '背景音乐：已关闭（点击播放）');
   }
 
   function save() {
-    try { localStorage.setItem(KEY, playing ? 'on' : 'off'); } catch (e) {}
+    try { localStorage.setItem(KEY, want ? 'on' : 'off'); } catch (e) {}
   }
 
   document.addEventListener('DOMContentLoaded', function() {
@@ -225,31 +275,28 @@
     btn.setAttribute('aria-label', '背景音乐开关');
     document.body.appendChild(btn);
 
+    // 点击按钮本身不触发"首次手势恢复"，避免与开关逻辑互相抵消
+    ['pointerdown', 'touchstart'].forEach(function(t) {
+      btn.addEventListener(t, function(e) { e.stopPropagation(); });
+    });
+
     btn.addEventListener('click', function() {
-      if (playing) {
-        stop();
-      } else if (!start()) {
-        return;
-      }
+      want = !want;
+      if (want) { start(); } else { stop(); }
       render();
       save();
     });
 
-    render();
-
-    // 若上次为开启状态，等待首次用户交互后自动恢复（受浏览器自动播放策略限制）
+    // 恢复上次的选择；默认开启，音乐只由用户自己决定关不关
     var pref = null;
     try { pref = localStorage.getItem(KEY); } catch (e) {}
-    if (pref === 'on') {
-      var resume = function() {
-        document.removeEventListener('pointerdown', resume);
-        document.removeEventListener('keydown', resume);
-        document.removeEventListener('touchstart', resume);
-        if (!playing && start()) render();
-      };
-      document.addEventListener('pointerdown', resume);
-      document.addEventListener('keydown', resume);
-      document.addEventListener('touchstart', resume);
+    want = (pref !== 'off');
+    render();
+
+    if (want) {
+      start();
+      // 若被浏览器自动播放策略挂起（无声），等首次交互立即恢复出声
+      if (ac && ac.state === 'suspended') bindResume();
     }
   });
 })();
