@@ -121,12 +121,20 @@
   ];
 
   var PROG_KEY = 'yuyoo_music_progress';
+  var AUDIO_KEY = 'yuyoo_music_at';
+
+  // 本地音乐文件（页面可能在根目录，也可能在 pages/ 子目录）
+  var AUDIO_DIR = /\/pages\//.test(location.pathname) ? '../assets/audio/' : 'assets/audio/';
+  var AUDIO_FILE = AUDIO_DIR + 'bgm.mp3';
 
   var ac = null, master = null, filter = null;
   var voices = [];
   var chordTimer = null;
   var want = false;     // 用户意愿：是否要音乐（持久化，只能由用户自己决定）
   var playing = false;  // 是否已调度播放
+  var mode = null;      // 'audio' 本地音乐文件优先 / 'synth' 程序化音乐回落
+  var audioEl = null;   // 本地音乐的播放元素
+  var atSaver = null;
   var btn = null;
   var resumeBound = false;
 
@@ -202,7 +210,75 @@
     }, delay);
   }
 
+  // 本地音乐播放位置的记忆（切页 / 刷新后从断点接着放）
+  function readAt() {
+    try { return JSON.parse(sessionStorage.getItem(AUDIO_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function saveAt() {
+    if (!audioEl || !audioEl.duration) return;
+    try { sessionStorage.setItem(AUDIO_KEY, JSON.stringify({ t: audioEl.currentTime, ts: Date.now() })); } catch (e) {}
+  }
+  function applyResumePos() {
+    var st = readAt();
+    if (!st || typeof st.t !== 'number' || !audioEl || !audioEl.duration) return;
+    var pos = st.t + (Date.now() - st.ts) / 1000;
+    try { audioEl.currentTime = pos % audioEl.duration; } catch (e) {}
+  }
+
+  // 探测本地音乐文件：存在就用它，否则回落到程序化音乐（保证页面永远不会哑掉）
+  function probeAudio(cb) {
+    try {
+      audioEl = new Audio();
+      audioEl.preload = 'metadata';
+      audioEl.loop = true;
+      var settled = false;
+      audioEl.addEventListener('loadedmetadata', function() {
+        if (settled) return;
+        settled = true;
+        applyResumePos();
+        atSaver = setInterval(saveAt, 1000);
+        cb('audio');
+      });
+      audioEl.addEventListener('error', function() {
+        if (settled) return;
+        settled = true;
+        audioEl = null;
+        cb('synth');
+      });
+      audioEl.src = AUDIO_FILE;
+      audioEl.load();
+    } catch (e) {
+      audioEl = null;
+      cb('synth');
+    }
+  }
+
+  function startAudio() {
+    if (!audioEl) return false;
+    unbindResume();
+    var p = audioEl.play();
+    if (p && p.catch) p.catch(function() { bindResume(); });
+    playing = true;
+    return true;
+  }
+  function stopAudio() {
+    if (atSaver) { clearInterval(atSaver); atSaver = null; }
+    if (audioEl) { try { saveAt(); audioEl.pause(); } catch (e) {} }
+  }
+
+  // 对外统一入口：按实际可用的音乐来源分发
   function start() {
+    if (mode === 'audio') return startAudio();
+    if (mode === 'synth') return startSynth();
+    return false;
+  }
+  function stop() {
+    playing = false;
+    if (mode === 'audio') { stopAudio(); return; }
+    stopSynth();
+  }
+
+  function startSynth() {
     ensureCtx();
     if (!ac) return false;
     if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
@@ -227,7 +303,7 @@
     return true;
   }
 
-  function stop() {
+  function stopSynth() {
     playing = false;
     if (chordTimer) { clearTimeout(chordTimer); chordTimer = null; }
     if (!ac) return;
@@ -240,7 +316,15 @@
   // 浏览器自动播放策略：音频被挂起时，等首次用户交互立即恢复出声
   function onFirstGesture() {
     unbindResume();
-    if (!want || !ac) return;
+    if (!want) return;
+    if (mode === 'audio') {
+      if (audioEl) {
+        var p = audioEl.play();
+        if (p && p.catch) p.catch(function() {});
+      }
+      return;
+    }
+    if (!ac) return;
     if (ac.state === 'suspended' && ac.resume) { try { ac.resume(); } catch (e) {} }
   }
   function bindResume() {
@@ -293,10 +377,17 @@
     want = (pref !== 'off');
     render();
 
-    if (want) {
+    // 优先播放本地音乐文件（assets/audio/bgm.mp3）；没有该文件时回落到程序化音乐
+    probeAudio(function(m) {
+      mode = m;
+      if (!want) return;
       start();
-      // 若被浏览器自动播放策略挂起（无声），等首次交互立即恢复出声
-      if (ac && ac.state === 'suspended') bindResume();
-    }
+      // 被浏览器自动播放策略拦截时（无声），等首次交互立即恢复出声
+      if (mode === 'audio') {
+        if (!audioEl || audioEl.paused) bindResume();
+      } else if (ac && ac.state === 'suspended') {
+        bindResume();
+      }
+    });
   });
 })();
