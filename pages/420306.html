@@ -105,8 +105,12 @@
   .video-close { width:32px; height:32px; flex-shrink:0; border:none; border-radius:50%; background:rgba(255,255,255,0.16);
     color:#fff; font-size:15px; cursor:pointer; transition:transform .25s ease, background .25s ease; }
   .video-close:active { transform:scale(0.92); background:rgba(255,255,255,0.26); }
-  .video-frame { width:100%; background:#000; border-radius:12px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.5); }
+  .video-frame { position:relative; width:100%; background:#000; border-radius:12px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,0.5); }
   .video-frame video { display:block; width:100%; max-height:60vh; background:#000; }
+  /* 视频体积较大，加载期间给出明确反馈，避免黑屏等待 */
+  .video-tip { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.45); color:#fff; font-size:13px; text-align:center; padding:0 20px; pointer-events:none; }
+  .video-tip.hide { display:none; }
   /* 轻提示（视频资源未接入时的反馈） */
   .video-toast { position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom) + 84px); transform:translateX(-50%);
     z-index:10001; max-width:80%; padding:11px 18px; border-radius:22px; background:rgba(24,28,36,0.92); color:#fff;
@@ -236,6 +240,7 @@
       </div>
       <div class="video-frame">
         <video id="videoPlayer" controls playsinline webkit-playsinline preload="metadata"></video>
+        <div class="video-tip" id="videoTip">视频加载中…</div>
       </div>
     </div>
   </div>
@@ -251,8 +256,8 @@
    *   window.onCompanyVideoRequest = function () { ... };
    */
   var COMPANY_VIDEO = {
-    src: '',
-    poster: '',
+    src: '../assets/video/company.mp4',
+    poster: '../assets/img/video-poster.jpg',
     title: '誉友科技 · 公司介绍'
   };
 
@@ -261,6 +266,7 @@
     var player = document.getElementById('videoPlayer');
     var titleEl = document.getElementById('videoTitle');
     var toast = document.getElementById('videoToast');
+    var tip = document.getElementById('videoTip');
     var toastTimer = null;
 
     function showToast(msg) {
@@ -269,6 +275,19 @@
       if (toastTimer) clearTimeout(toastTimer);
       toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2400);
     }
+
+    // 视频体积较大：加载中/失败都要有明确反馈，避免黑屏干等
+    function showTip(msg) {
+      tip.textContent = msg;
+      tip.classList.remove('hide');
+    }
+    function hideTip() { tip.classList.add('hide'); }
+
+    player.addEventListener('canplay', hideTip);
+    player.addEventListener('playing', hideTip);
+    player.addEventListener('error', function () {
+      if (modal.classList.contains('show')) showTip('视频加载失败，请检查网络后重试');
+    });
 
     function closeVideo() {
       modal.classList.remove('show');
@@ -287,9 +306,10 @@
       titleEl.textContent = COMPANY_VIDEO.title || '公司介绍视频';
       if (COMPANY_VIDEO.poster) player.poster = COMPANY_VIDEO.poster;
       player.src = COMPANY_VIDEO.src;
+      showTip('视频加载中…');
       modal.classList.add('show');
       var p = player.play();
-      if (p && p.catch) p.catch(function () {});  // 移动端可能需用户再点一次播放键
+      if (p && p.catch) p.catch(function () { hideTip(); });  // 移动端可能需用户再点一次播放键
     }
 
     document.getElementById('videoEntry').addEventListener('click', openVideo);

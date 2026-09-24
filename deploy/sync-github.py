@@ -45,8 +45,8 @@ def token():
 TOKEN = token()
 
 
-def api(method, path, data=None):
-    """调用 GitHub REST API；对瞬时 404/5xx 做重试。"""
+def api(method, path, data=None, timeout=90):
+    """调用 GitHub REST API；对瞬时 404/5xx 做重试。大文件（如视频）需传更大的 timeout。"""
     body = json.dumps(data, ensure_ascii=False).encode("utf-8") if data is not None else None
     req = urllib.request.Request("https://api.github.com" + path, data=body, method=method)
     req.add_header("Authorization", "Bearer " + TOKEN)
@@ -57,13 +57,19 @@ def api(method, path, data=None):
     last = None
     for attempt in range(5):
         try:
-            with urllib.request.urlopen(req, timeout=90) as r:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
                 return json.loads(r.read().decode("utf-8"))
         except urllib.error.HTTPError as e:
             last = e
             if e.code in (404, 500, 502, 503) and attempt < 4:
                 time.sleep(2)
                 continue
+            # 把 GitHub 的报错正文带出来，否则只有一句 422 无法定位
+            try:
+                detail = e.read().decode("utf-8", "replace")[:600]
+                print(f"  [API {e.code}] {detail}", file=sys.stderr)
+            except Exception:
+                pass
             raise
     raise last
 
@@ -129,11 +135,18 @@ def main():
     items = []
     for rel in sorted(set(added) | set(changed)):
         sha, raw = shas[rel]
+        # 大文件（视频/音频）走 Git Data API 时请求体会被 base64 放大 1/3，
+        # 需放宽超时，否则国内上传容易卡在 90s 读超时上
+        big = len(raw) > 5 * 1024 * 1024
+        if big:
+            print(f"  uploading {rel} ({len(raw)/1048576:.1f} MB, 请稍候)...")
         blob = api("POST", f"/repos/{REPO}/git/blobs",
-                   {"content": base64.b64encode(raw).decode("ascii"), "encoding": "base64"})
+                   {"content": base64.b64encode(raw).decode("ascii"), "encoding": "base64"},
+                   timeout=900 if big else 90)
         items.append({"path": rel, "mode": "100755" if rel.endswith(".sh") else "100644",
                       "type": "blob", "sha": blob["sha"]})
-        print(f"  uploaded {rel}")
+        if not big:
+            print(f"  uploaded {rel}")
     for rel in deleted:
         items.append({"path": rel, "mode": "100644", "type": "blob", "sha": None})
 
